@@ -1,0 +1,98 @@
+<?php
+session_start();
+require_once 'includes/db.php';
+require_once 'includes/auth.php';
+require_once 'includes/functions.php';
+
+if (is_logged_in()) redirect('index.php');
+
+$error = '';
+$success = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
+    $name         = trim($_POST['name'] ?? '');
+    $username     = trim($_POST['username'] ?? '');
+    $email        = trim($_POST['email'] ?? '');
+    $password     = $_POST['password'] ?? '';
+    $confirm      = $_POST['confirm'] ?? '';
+    $role         = $_POST['role'] ?? 'student';
+    $campus_id    = (int)($_POST['campus_id'] ?? 0);
+    $program_id   = (int)($_POST['program_id'] ?? 0);
+    $year_level   = $_POST['role'] === 'student' ? (int)($_POST['year_level'] ?? 0) : null;
+    $department   = trim($_POST['department'] ?? '');
+
+    // Validation
+    if (!$name || !$username || !$email || !$password) {
+        $error = 'All required fields must be filled.';
+    } elseif (strlen($password) < 8) {
+        $error = 'Password must be at least 8 characters.';
+    } elseif ($password !== $confirm) {
+        $error = 'Passwords do not match.';
+    } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+        $error = 'Username can only contain letters, numbers, and underscores.';
+    } elseif (db_count("SELECT COUNT(*) FROM users WHERE email = ?", [$email])) {
+        $error = 'Email already registered.';
+    } elseif (db_count("SELECT COUNT(*) FROM users WHERE username = ?", [$username])) {
+        $error = 'Username already taken.';
+    } elseif (!in_array($role, ['student', 'instructor'])) {
+        $error = 'Invalid role selected.';
+    } elseif ($role === 'student' && !$year_level) {
+        $error = 'Please select your year level.';
+    } elseif ($role === 'instructor' && !str_contains($email, '@jrmsu.edu.ph')) {
+        $error = 'Instructors must use JRMSU email (@jrmsu.edu.ph).';
+    } else {
+        // Prepare insert data
+        $insert_data = [
+            $name, $username, $email, password_hash($password, PASSWORD_BCRYPT, ['cost'=>12]),
+            $role, $campus_id ?: null, $program_id ?: null
+        ];
+        $columns = '(name, username, email, password, role, campus_id, program_id';
+        $values = '(?, ?, ?, ?, ?, ?, ?';
+        if ($role === 'student' && $year_level) {
+            $columns .= ', year_level';
+            $values .= ', ?';
+            $insert_data[] = $year_level;
+        }
+        if ($role === 'instructor' && $department) {
+            $columns .= ', bio';
+            $values .= ', ?';
+            $insert_data[] = "Department: $department";
+        }
+        $columns .= ', reputation, is_active, created_at, updated_at)';
+        $values .= ', 0, 1, NOW(), NOW())';
+
+        $id = db_insert("INSERT INTO users $columns VALUES $values", $insert_data);
+        session_regenerate_id(true);
+        $_SESSION['user_id'] = $id;
+        flash('success', "Welcome to PANTHERVERSE, $name! 🎉 Your role: " . ucfirst($role));
+        redirect('index.php');
+    }
+}
+
+$campuses = db_rows("SELECT id, name, code FROM campuses WHERE is_active=1 ORDER BY name");
+$programs = db_rows("SELECT id, name, code FROM programs ORDER BY name");
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Register — PANTHERVERSE</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0720;--surface:#1a0e38;--border:rgba(124,58,237,0.3);--purple:#7c3aed;--gold:#f4a623;--gold-d:#d97706;--text:#e8dff8;--text-m:#a78bca;--text-d:#6b4fa0;--red:#ef4444;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background-image:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(124,58,237,0.2) 0%,transparent 60%);}
+.wrap{width:100%;max-width:480px;}
+.logo-area{text-align:center;margin-bottom:24px;}
+.logo-area h1{font-family:'Rajdhani',sans-serif;font-size:1.8rem;font-weight:700;color:#fff;}
+.logo-area h1 span{color:var(--gold);}
+.logo-area p{font-size:0.82rem;color:var(--text-d);margin-top:4px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;}
+.card h2{font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:20px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:0.82rem;font-weight:600;color:var(--text-m);margin-bottom:5px;}
+.fg input,.fg select{width:100%;background:rgba(124,58,237,0.08);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 11px;font-size:0.875rem;font-family:'Nunito',sans-serif;outline:none;transition:border-color 0.2s;}
+.fg input:focus,.fg select:focus{border-color:var(--purple);}
+.fg input::placeholder{color:var(--text-d);}

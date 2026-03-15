@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "*.php",
+      "use": "vercel-php@0.6.0"
+    },
+    {
+      "src": "admin/*.php",
+      "use": "vercel-php@0.6.0"
+    },
+    {
+      "src": "assets/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/admin/(.*)\\.php", "dest": "/admin/$1.php" },
+    { "src": "/(.*)\\.php", "dest": "/$1.php" },
+    { "src": "/", "dest": "/index.php" },
+    { "src": "/(.*)", "dest": "/$1.php" }
+  ],
+  "env": {
+    "DB_HOST":    "@pantherverse_db_host",
+    "DB_NAME":    "@pantherverse_db_name",
+    "DB_USER":    "@pantherverse_db_user",
+    "DB_PASS":    "@pantherverse_db_pass"
+  }
+}

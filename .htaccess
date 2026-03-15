@@ -1,0 +1,14 @@
+# PANTHERVERSE - Apache URL Rewriting
+Options -MultiViews
+RewriteEngine On
+
+# Don't rewrite for real files/directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Route /page to /page.php
+RewriteRule ^([a-zA-Z0-9\-_/]+)$ $1.php [L,QSA]
+
+# Handle index
+RewriteRule ^$ index.php [L]
+
