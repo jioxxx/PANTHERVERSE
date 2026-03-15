@@ -20,11 +20,5 @@
     { "src": "/(.*)\\.php", "dest": "/$1.php" },
     { "src": "/", "dest": "/index.php" },
     { "src": "/(.*)", "dest": "/$1.php" }
-  ],
-  "env": {
-    "DB_HOST":    "@pantherverse_db_host",
-    "DB_NAME":    "@pantherverse_db_name",
-    "DB_USER":    "@pantherverse_db_user",
-    "DB_PASS":    "@pantherverse_db_pass"
-  }
+  ]
 }
