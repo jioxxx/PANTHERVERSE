@@ -1,4 +1,5 @@
 <?php
+// PANTHERVERSE DEPLOYMENT VERSION: 2.0.1
 session_start();
 require_once 'includes/db.php';
 require_once 'includes/auth.php';
