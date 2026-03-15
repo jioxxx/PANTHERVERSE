@@ -5,7 +5,7 @@
 // ============================================================
 
 define('DB_TYPE',    getenv('DB_TYPE')    ?: 'mysql');
-define('DB_HOST',    getenv('DB_HOST')    ?: 'localhost');
+define('DB_HOST',    getenv('DB_HOST')    ?: '127.0.0.1');
 define('DB_NAME',    getenv('DB_NAME')    ?: 'pantherverse_db');
 define('DB_USER',    getenv('DB_USER')    ?: 'root');
 define('DB_PASS',    getenv('DB_PASS')    ?: '');
@@ -36,7 +36,7 @@ function db(): PDO {
         $db_type_label = DB_TYPE === 'pgsql' ? 'PostgreSQL (Supabase)' : 'MySQL (Laragon)';
         die('<div style="font-family:monospace;padding:30px;background:#0e0720;color:#f4a623;min-height:100vh;">
         <div style="max-width:500px;margin:80px auto;background:#1a0e38;border:2px solid rgba(124,58,237,0.4);border-radius:12px;padding:28px;">
-            <h2>⚠️ Database Connection Failed</h2>
+            <h2>⚠️ Database Connection Failed (v2)</h2>
             <p style="color:#a78bca;margin:12px 0;">Attempted to connect to <strong>' . $db_type_label . '</strong>.</p>
             <p style="color:#a78bca;margin:12px 0;">Check your Vercel Environment Variables or local Laragon settings.</p>
             <p style="color:#ef4444;font-size:0.82rem;background:#0e0720;padding:10px;border-radius:6px;">'.htmlspecialchars($e->getMessage()).'</p>
