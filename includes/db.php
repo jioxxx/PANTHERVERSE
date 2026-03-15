@@ -28,13 +28,17 @@ function db(): PDO {
             PDO::ATTR_EMULATE_PREPARES   => false,
         ]);
         
-        // Disable ONLY_FULL_GROUP_BY mode for compatibility
-        $GLOBALS['_db']->exec("SET sql_mode = ''");
+        // MySQL specific optimizations
+        if (DB_TYPE === 'mysql') {
+            $GLOBALS['_db']->exec("SET sql_mode = ''");
+        }
     } catch (PDOException $e) {
+        $db_type_label = DB_TYPE === 'pgsql' ? 'PostgreSQL (Supabase)' : 'MySQL (Laragon)';
         die('<div style="font-family:monospace;padding:30px;background:#0e0720;color:#f4a623;min-height:100vh;">
         <div style="max-width:500px;margin:80px auto;background:#1a0e38;border:2px solid rgba(124,58,237,0.4);border-radius:12px;padding:28px;">
             <h2>⚠️ Database Connection Failed</h2>
-            <p style="color:#a78bca;margin:12px 0;">Make sure MySQL is running in Laragon and <code>pantherverse_db</code> exists. Import <strong>pantherverse_db.sql</strong> via HeidiSQL.</p>
+            <p style="color:#a78bca;margin:12px 0;">Attempted to connect to <strong>' . $db_type_label . '</strong>.</p>
+            <p style="color:#a78bca;margin:12px 0;">Check your Vercel Environment Variables or local Laragon settings.</p>
             <p style="color:#ef4444;font-size:0.82rem;background:#0e0720;padding:10px;border-radius:6px;">'.htmlspecialchars($e->getMessage()).'</p>
         </div>');
     }
