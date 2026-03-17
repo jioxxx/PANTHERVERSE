@@ -88,9 +88,9 @@ require_once 'includes/header.php';
     position:absolute;inset:0;
     background: linear-gradient(
       135deg,
-      rgba(14,7,32,0.92) 0%,
-      rgba(90,33,182,0.55) 50%,
-      rgba(14,7,32,0.90) 100%
+      rgba(14,7,32,0.65) 0%,
+      rgba(90,33,182,0.45) 50%,
+      rgba(14,7,32,0.7) 100%
     );
     z-index:1;
   "></div>

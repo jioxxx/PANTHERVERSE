@@ -482,7 +482,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 #pv-preloader {
   position: fixed; inset: 0; z-index: 9999;
   /* Blend the provided background image with a dark purple/black gradient for an intense loading screen overlay */
-  background: linear-gradient(to bottom, rgba(14, 7, 32, 0.8), rgba(26, 14, 56, 0.95)), url('assets/preloader_bg.jpg') center/cover no-repeat;
+  background: linear-gradient(to bottom, rgba(14, 7, 32, 0.8), rgba(26, 14, 56, 0.95)), url('/assets/preloader_bg.jpg') center/cover no-repeat;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s;
 }
@@ -543,7 +543,7 @@ if (!sessionStorage.getItem('pv_loaded')) {
 <div id="pv-preloader">
   <div class="preloader-orbit">
     <div class="preloader-ring"></div>
-    <img src="assets/logo.png" class="preloader-logo" alt="logo" onerror="this.src='https://ui-avatars.com/api/?name=P&background=5B21B6&color=F4A623&bold=true'">
+    <img src="/assets/logo.png" class="preloader-logo" alt="logo" onerror="this.src='https://ui-avatars.com/api/?name=P&background=5B21B6&color=F4A623&bold=true'">
   </div>
   <div class="preloader-text">Initializing</div>
   <div class="preloader-bar"></div>
@@ -558,7 +558,7 @@ window.addEventListener('load', () => {
     } else {
         // Play the Panther Roar Audio Effect
         try {
-            const roar = new Audio('assets/panther3.mp3');
+            const roar = new Audio('/assets/panther3.mp3');
             roar.volume = 0.5;
             roar.play().catch(e => console.log('Autoplay blocked by browser policy:', e));
         } catch (e) {}
