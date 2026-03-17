@@ -17,12 +17,35 @@ $GLOBALS['_db'] = null;
 function db(): PDO {
     if ($GLOBALS['_db']) return $GLOBALS['_db'];
     try {
-        if (DB_TYPE === 'pgsql') {
-            $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME;
+        $db_url = getenv('DATABASE_URL');
+        if ($db_url) {
+            // Support full DATABASE_URL (common on Vercel/Heroku/Neon)
+            $url = parse_url($db_url);
+            $type = $url['scheme'] === 'postgres' ? 'pgsql' : ($url['scheme'] === 'mysql' ? 'mysql' : DB_TYPE);
+            $host = $url['host'];
+            $port = $url['port'] ?? ($type === 'mysql' ? '3306' : '5432');
+            $user = $url['user'];
+            $pass = $url['pass'] ?? '';
+            $name = ltrim($url['path'], '/');
+            
+            if ($type === 'pgsql') {
+                $dsn = "pgsql:host=$host;port=$port;dbname=$name;sslmode=require";
+            } else {
+                $dsn = "mysql:host=$host;port=$port;dbname=$name;charset=".DB_CHARSET;
+            }
+            $db_user = $user;
+            $db_pass = $pass;
         } else {
-            $dsn = "mysql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME.";charset=".DB_CHARSET;
+            if (DB_TYPE === 'pgsql') {
+                $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME.";sslmode=require";
+            } else {
+                $dsn = "mysql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME.";charset=".DB_CHARSET;
+            }
+            $db_user = DB_USER;
+            $db_pass = DB_PASS;
         }
-        $GLOBALS['_db'] = new PDO($dsn, DB_USER, DB_PASS, [
+
+        $GLOBALS['_db'] = new PDO($dsn, $db_user, $db_pass, [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
