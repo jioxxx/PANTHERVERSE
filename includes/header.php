@@ -72,7 +72,7 @@ code { font-size: 0.875em; background: var(--bg3); color: var(--gold); padding: 
   height: 60px;
   display: flex; align-items: center; gap: 16px;
 }
-        <?php $avatar_src = !empty($user['profile_photo']) ? '/assets/uploads/profiles/'.e($user['profile_photo']) : avatar_url($user['username']); ?>
+
 .nav-logo {
   font-family: 'Rajdhani', sans-serif;
   font-size: 1.4rem; font-weight: 700;
