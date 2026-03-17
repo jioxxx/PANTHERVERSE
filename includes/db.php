@@ -145,16 +145,31 @@ function db(): PDO {
 }
 
 function db_row(string $sql, array $params = []): ?array {
-    $stmt = db()->prepare($sql); $stmt->execute($params);
-    return $stmt->fetch() ?: null;
+    try {
+        $stmt = db()->prepare($sql); $stmt->execute($params);
+        return $stmt->fetch() ?: null;
+    } catch (PDOException $e) {
+        if (in_array($e->getCode(), ['42P01', '42S02'])) return null;
+        throw $e;
+    }
 }
 function db_rows(string $sql, array $params = []): array {
-    $stmt = db()->prepare($sql); $stmt->execute($params);
-    return $stmt->fetchAll();
+    try {
+        $stmt = db()->prepare($sql); $stmt->execute($params);
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        if (in_array($e->getCode(), ['42P01', '42S02'])) return [];
+        throw $e;
+    }
 }
 function db_count(string $sql, array $params = []): int {
-    $stmt = db()->prepare($sql); $stmt->execute($params);
-    return (int)$stmt->fetchColumn();
+    try {
+        $stmt = db()->prepare($sql); $stmt->execute($params);
+        return (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        if (in_array($e->getCode(), ['42P01', '42S02'])) return 0;
+        throw $e;
+    }
 }
 function db_insert(string $sql, array $params = []): int {
     $stmt = db()->prepare($sql); $stmt->execute($params);
