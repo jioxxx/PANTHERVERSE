@@ -1,1 +1,14 @@
-# Git ignore for Pantherverse&#10;assets/uploads/*&#10;!assets/uploads/.gitkeep&#10;.DS_Store&#10;Thumbs.db&#10;*.log&#10;.env&#10;.nyc_output&#10;coverage/&#10;node_modules/&#10;# Keep vercel.json and SQL files
+# Git ignore for Pantherverse
+assets/uploads/*
+!assets/uploads/.gitkeep
+.DS_Store
+Thumbs.db
+*.log
+.env
+.nyc_output
+coverage/
+node_modules/
+
+# Keep vercel.json and SQL files
+!vercel.json
+!*.sql

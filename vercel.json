@@ -15,8 +15,9 @@
     }
   ],
   "routes": [
-    { "handle": "filesystem" },
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
     { "src": "/admin/(.*)", "dest": "/admin/$1.php" },
-    { "src": "/(.*)", "dest": "/$1.php" }
+    { "src": "/", "dest": "/index.php" },
+    { "src": "/((?!assets|admin|api).*)", "dest": "/$1.php" }
   ]
 }
