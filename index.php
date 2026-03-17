@@ -1,29 +1,34 @@
 <?php
-// PANTHERVERSE DEPLOYMENT VERSION: 2.0.1
+// PANTHERVERSE DEPLOYMENT VERSION: 2.0.2 (Postgres Fixed)
 session_start();
 require_once 'includes/db.php';
 require_once 'includes/auth.php';
 require_once 'includes/functions.php';
+
+$is_pgsql = $GLOBALS['_is_pgsql'];
+$bool_true = $GLOBALS['_sql_true'];
+$bool_false = $GLOBALS['_sql_false'];
+$group_concat = $is_pgsql ? "STRING_AGG(t.name, ',')" : "GROUP_CONCAT(t.name SEPARATOR ',')";
 
 // Stats
 $stats = [
     'questions' => db_count("SELECT COUNT(*) FROM questions"),
     'members'   => db_count("SELECT COUNT(*) FROM users"),
     'answers'   => db_count("SELECT COUNT(*) FROM answers"),
-    'solved'    => db_count("SELECT COUNT(*) FROM questions WHERE is_solved=1"),
+    'solved'    => db_count("SELECT COUNT(*) FROM questions WHERE is_solved=" . sql_bool(true)),
 ];
 
 // Recent questions
 $recent_questions = db_rows("
     SELECT q.*, u.username, u.reputation,
            (SELECT COUNT(*) FROM answers a WHERE a.question_id = q.id) as answer_count,
-           GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ',') as tag_names
+           $group_concat as tag_names
     FROM questions q
     JOIN users u ON q.user_id = u.id
     LEFT JOIN question_tag qt ON q.id = qt.question_id
     LEFT JOIN tags t ON qt.tag_id = t.id
     WHERE q.deleted_at IS NULL
-    GROUP BY q.id
+    GROUP BY q.id, u.username, u.reputation
     ORDER BY q.created_at DESC
     LIMIT 8
 ");
@@ -34,13 +39,13 @@ try {
     $most_liked_questions = db_rows("
         SELECT q.*, u.username, u.reputation,
                (SELECT COUNT(*) FROM answers a WHERE a.question_id = q.id) as answer_count,
-               GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ',') as tag_names
+               $group_concat as tag_names
         FROM questions q
         JOIN users u ON q.user_id = u.id
         LEFT JOIN question_tag qt ON q.id = qt.question_id
         LEFT JOIN tags t ON qt.tag_id = t.id
         WHERE q.deleted_at IS NULL AND q.like_count > 0
-        GROUP BY q.id
+        GROUP BY q.id, u.username, u.reputation
         ORDER BY q.like_count DESC, q.created_at DESC
         LIMIT 5
     ");
@@ -49,11 +54,15 @@ try {
 }
 
 // Top contributors
-$top_users = db_rows("SELECT id, username, reputation, role FROM users WHERE is_active=1 ORDER BY reputation DESC LIMIT 5");
+$top_users = db_rows("SELECT id, username, reputation, role FROM users WHERE is_active=$bool_true ORDER BY reputation DESC LIMIT 5");
 
 // Active announcements
 // Active announcements with dismissal filter
-$announcements = db_rows("SELECT a.*, u.username FROM announcements a JOIN users u ON a.user_id = u.id WHERE (a.expires_at IS NULL OR a.expires_at > NOW()) AND a.deleted_at IS NULL ORDER BY FIELD(a.priority,'urgent','important','normal'), a.created_at DESC LIMIT 5");
+$priority_order = $is_pgsql 
+    ? "CASE WHEN a.priority='urgent' THEN 1 WHEN a.priority='important' THEN 2 ELSE 3 END" 
+    : "FIELD(a.priority,'urgent','important','normal')";
+
+$announcements = db_rows("SELECT a.*, u.username FROM announcements a JOIN users u ON a.user_id = u.id WHERE (a.expires_at IS NULL OR a.expires_at > NOW()) AND a.deleted_at IS NULL ORDER BY $priority_order, a.created_at DESC LIMIT 5");
 $dismissed_ids = explode(',', $_COOKIE['dismissed_ann'] ?? '');
 $announcements = array_filter($announcements, function($a) use ($dismissed_ids) {
     return !in_array($a['id'], $dismissed_ids);

@@ -320,10 +320,11 @@ function search_all(string $query, string $type = '', int $limit = 20): array {
     }
     
     if (empty($type) || $type === 'users') {
+        $bool_true = $GLOBALS['_sql_true'];
         $results['users'] = db_rows("
             SELECT id, username, name, role, reputation, bio
             FROM users
-            WHERE is_active = 1 AND (username LIKE ? OR name LIKE ? OR email LIKE ?)
+            WHERE is_active = $bool_true AND (username LIKE ? OR name LIKE ? OR email LIKE ?)
             ORDER BY reputation DESC
             LIMIT ?
         ", [$q, $q, $q, $limit]);
@@ -370,7 +371,8 @@ function search_all(string $query, string $type = '', int $limit = 20): array {
 // ─────────────────────────────────────────────────────────────
 
 function get_users_directory(?string $role = null, ?int $campus_id = null, ?int $program_id = null, string $search = '', int $limit = 20, int $offset = 0): array {
-    $conditions = ["u.is_active = 1"];
+    $bool_true = $GLOBALS['_sql_true'];
+    $conditions = ["u.is_active = $bool_true"];
     $params = [];
     
     if ($role) {
@@ -431,8 +433,9 @@ function get_analytics_summary(): array {
     $week_ago = date('Y-m-d', strtotime('-7 days'));
     $month_ago = date('Y-m-d', strtotime('-30 days'));
     
+    $bool_true = $GLOBALS['_sql_true'];
     return [
-        'total_users' => db_count("SELECT COUNT(*) FROM users WHERE is_active = 1"),
+        'total_users' => db_count("SELECT COUNT(*) FROM users WHERE is_active = $bool_true"),
         'total_questions' => db_count("SELECT COUNT(*) FROM questions WHERE deleted_at IS NULL"),
         'total_answers' => db_count("SELECT COUNT(*) FROM answers WHERE deleted_at IS NULL"),
         'total_resources' => db_count("SELECT COUNT(*) FROM resources WHERE deleted_at IS NULL"),
@@ -555,13 +558,20 @@ function delete_api_token(int $token_id, int $user_id): void {
 // ─────────────────────────────────────────────────────────────
 
 function get_tag_wiki(int $tag_id): ?array {
-    return db_row("SELECT tw.*, u.username FROM tag_wikis tw JOIN users u ON tw.user_id = u.id WHERE tw.tag_id = ? AND tw.is_approved = 1", [$tag_id]);
+    $bool_true = $GLOBALS['_sql_true'];
+    return db_row("SELECT tw.*, u.username FROM tag_wikis tw JOIN users u ON tw.user_id = u.id WHERE tw.tag_id = ? AND tw.is_approved = $bool_true", [$tag_id]);
 }
 
 function save_tag_wiki(int $tag_id, int $user_id, string $content): void {
-    db_exec("INSERT INTO tag_wikis (tag_id, user_id, content, is_approved, created_at, updated_at) VALUES (?, ?, ?, 0, NOW(), NOW())
-             ON DUPLICATE KEY UPDATE content = ?, user_id = ?, updated_at = NOW()",
-        [$tag_id, $user_id, $content, $content, $user_id]);
+    if ($GLOBALS['_is_pgsql']) {
+        db_exec("INSERT INTO tag_wikis (tag_id, user_id, content, is_approved, created_at, updated_at) VALUES (?, ?, ?, FALSE, NOW(), NOW())
+                 ON CONFLICT (tag_id) DO UPDATE SET content = EXCLUDED.content, user_id = EXCLUDED.user_id, updated_at = NOW()",
+            [$tag_id, $user_id, $content]);
+    } else {
+        db_exec("INSERT INTO tag_wikis (tag_id, user_id, content, is_approved, created_at, updated_at) VALUES (?, ?, ?, 0, NOW(), NOW())
+                 ON DUPLICATE KEY UPDATE content = ?, user_id = ?, updated_at = NOW()",
+            [$tag_id, $user_id, $content, $content, $user_id]);
+    }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -623,10 +633,11 @@ function get_popular_tags(int $limit = 16): array {
 }
 
 function get_hot_questions(int $limit = 5): array {
+    $date_expr = $GLOBALS['_is_pgsql'] ? "NOW() - INTERVAL '7 days'" : "DATE_SUB(NOW(), INTERVAL 7 DAY)";
     return db_rows("
         SELECT q.id, q.title, q.vote_count, q.view_count
         FROM questions q
-        WHERE q.deleted_at IS NULL AND q.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        WHERE q.deleted_at IS NULL AND q.created_at >= $date_expr
         ORDER BY (q.view_count + q.vote_count * 3) DESC
         LIMIT ?
     ", [$limit]);

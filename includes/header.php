@@ -583,7 +583,8 @@ function nav_active(string $match): string {
 // Unread DMs count
 $_unread_msgs = 0;
 if (is_logged_in()) {
-    $_unread_msgs = db_count("SELECT COUNT(*) FROM messages WHERE receiver_id=? AND is_read=0", [current_user_id()]);
+    $bool_false = $GLOBALS['_sql_false'];
+    $_unread_msgs = db_count("SELECT COUNT(*) FROM messages WHERE receiver_id=? AND is_read=$bool_false", [current_user_id()]);
 }
 // Pending consultation requests (instructor)
 $_pending_consults = 0;

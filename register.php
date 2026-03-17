@@ -56,12 +56,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $extra_params[] = "Instructor - Department: $department";
         }
 
+        $bool_true = $GLOBALS['_sql_true'];
         $columns = '(name, username, email, password, role, campus_id, program_id' . 
                    ($extra_columns ? ', ' . implode(', ', $extra_columns) : '') . 
                    ', reputation, is_active, created_at, updated_at)';
         $placeholders = '(?, ?, ?, ?, ?, ?, ?' . 
                         ($extra_values ? ', ' . implode(', ', $extra_values) : '') . 
-                        ', 0, 1, NOW(), NOW())';
+                        ", 0, $bool_true, NOW(), NOW())";
 
         $all_params = array_merge($insert_data, $extra_params);
 
@@ -73,7 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$campuses = db_rows("SELECT id, name, code FROM campuses WHERE is_active=1 ORDER BY name");
+$bool_true = $GLOBALS['_sql_true'];
+$campuses = db_rows("SELECT id, name, code FROM campuses WHERE is_active=$bool_true ORDER BY name");
 $programs = db_rows("SELECT id, name, code FROM programs ORDER BY name");
 ?>
 <!DOCTYPE html>

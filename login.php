@@ -15,7 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$email || !$password) {
         $error = 'Please fill in all fields.';
     } else {
-        $user = db_row("SELECT * FROM users WHERE email = ? AND is_active = 1", [$email]);
+        $bool_true = $GLOBALS['_sql_true'];
+        $user = db_row("SELECT * FROM users WHERE email = ? AND is_active = $bool_true", [$email]);
         if ($user && password_verify($password, $user['password'])) {
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user['id'];

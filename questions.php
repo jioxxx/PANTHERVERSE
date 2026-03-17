@@ -22,8 +22,12 @@ if ($search) {
     $where[] = "(q.title LIKE ? OR q.body LIKE ?)";
     $params[] = "%$search%"; $params[] = "%$search%";
 }
+$is_pgsql = $GLOBALS['_is_pgsql'];
+$bool_true = $GLOBALS['_sql_true'];
+$group_concat = $is_pgsql ? "STRING_AGG(t.name, ',')" : "GROUP_CONCAT(t.name SEPARATOR ',')";
+
 if ($tab === 'unanswered') $where[] = "(SELECT COUNT(*) FROM answers a WHERE a.question_id=q.id)=0";
-if ($tab === 'solved')     $where[] = "q.is_solved=1";
+if ($tab === 'solved')     $where[] = "q.is_solved=" . sql_bool(true);
 
 $order = match($tab) {
     'popular' => "q.vote_count DESC, q.view_count DESC",
@@ -36,13 +40,13 @@ $total = db_count("SELECT COUNT(*) FROM questions q WHERE $where_sql", $params);
 $questions = db_rows("
     SELECT q.*, u.username, u.reputation,
            (SELECT COUNT(*) FROM answers a WHERE a.question_id=q.id) as answer_count,
-           GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ',') as tag_names
+           $group_concat as tag_names
     FROM questions q
     JOIN users u ON q.user_id=u.id
     LEFT JOIN question_tag qt ON q.id=qt.question_id
     LEFT JOIN tags t ON qt.tag_id=t.id
     WHERE $where_sql
-    GROUP BY q.id
+    GROUP BY q.id, u.username, u.reputation
     ORDER BY $order
     LIMIT $per OFFSET $offset
 ", $params);

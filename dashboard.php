@@ -9,17 +9,18 @@ $user = current_user();
 $uid  = current_user_id();
 
 // Personal stats
+$bool_true = $GLOBALS['_sql_true'];
 $stats = [
     'questions'   => db_count("SELECT COUNT(*) FROM questions WHERE user_id=? AND deleted_at IS NULL", [$uid]),
     'answers'     => db_count("SELECT COUNT(*) FROM answers WHERE user_id=? AND deleted_at IS NULL", [$uid]),
-    'accepted'    => db_count("SELECT COUNT(*) FROM answers WHERE user_id=? AND is_accepted=1 AND deleted_at IS NULL", [$uid]),
+    'accepted'    => db_count("SELECT COUNT(*) FROM answers WHERE user_id=? AND is_accepted=$bool_true AND deleted_at IS NULL", [$uid]),
     'resources'   => db_count("SELECT COUNT(*) FROM resources WHERE user_id=? AND deleted_at IS NULL", [$uid]),
     'groups'      => db_count("SELECT COUNT(*) FROM study_group_members WHERE user_id=?", [$uid]),
     'consultations'=> db_count("SELECT COUNT(*) FROM consultations WHERE student_id=? AND status='approved'", [$uid]),
 ];
 
 // Rank by reputation
-$rank = db_count("SELECT COUNT(*) FROM users WHERE reputation > ? AND is_active=1", [$user['reputation']]) + 1;
+$rank = db_count("SELECT COUNT(*) FROM users WHERE reputation > ? AND is_active=$bool_true", [$user['reputation']]) + 1;
 
 // Recent activity (questions + answers)
 $recent_activity = db_rows("
@@ -45,7 +46,8 @@ if (in_array($user['role'], ['instructor','admin'])) {
 }
 
 // Upcoming calendar events
-$upcoming_events = db_rows("SELECT * FROM calendar_events WHERE event_date >= CURDATE() AND (campus_id IS NULL OR campus_id=?) ORDER BY event_date ASC LIMIT 5", [$user['campus_id'] ?? 0]);
+$curdate_expr = $GLOBALS['_is_pgsql'] ? "CURRENT_DATE" : "CURDATE()";
+$upcoming_events = db_rows("SELECT * FROM calendar_events WHERE event_date >= $curdate_expr AND (campus_id IS NULL OR campus_id=?) ORDER BY event_date ASC LIMIT 5", [$user['campus_id'] ?? 0]);
 
 $type_colors = ['exam'=>'var(--red)','deadline'=>'var(--gold)','holiday'=>'var(--green)','event'=>'var(--purple-l)','class'=>'var(--text-m)','other'=>'var(--text-d)'];
 $type_icons  = ['exam'=>'📝','deadline'=>'⏰','holiday'=>'🌴','event'=>'🎉','class'=>'📚','other'=>'📌'];

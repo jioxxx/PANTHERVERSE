@@ -14,6 +14,21 @@ define('DB_CHARSET', 'utf8mb4');
 
 $GLOBALS['_db'] = null;
 
+// Proactively detect driver for global logic before db() is called
+$_initial_type = getenv('DB_TYPE') ?: 'mysql';
+$_db_url = getenv('DATABASE_URL');
+if ($_db_url) {
+    if (strpos($_db_url, 'postgres') !== false || strpos($_db_url, 'pgsql') !== false) $_initial_type = 'pgsql';
+}
+
+$GLOBALS['_is_pgsql'] = ($_initial_type === 'pgsql');
+$GLOBALS['_sql_true'] = $GLOBALS['_is_pgsql'] ? 'TRUE' : '1';
+$GLOBALS['_sql_false'] = $GLOBALS['_is_pgsql'] ? 'FALSE' : '0';
+
+function sql_bool(bool $val): string {
+    return $val ? $GLOBALS['_sql_true'] : $GLOBALS['_sql_false'];
+}
+
 function db(): PDO {
     if ($GLOBALS['_db']) return $GLOBALS['_db'];
     try {
@@ -32,6 +47,8 @@ function db(): PDO {
             
             $type = in_array($scheme, ['postgres', 'postgresql']) ? 'pgsql' : ($scheme === 'mysql' ? 'mysql' : DB_TYPE);
             $name = ltrim($path ?? '', '/');
+            
+            $GLOBALS['_is_pgsql'] = ($type === 'pgsql');
 
             // Find Project ID for Supabase
             $project_id = '';
@@ -67,6 +84,7 @@ function db(): PDO {
             $db_pass = DB_PASS;
             $db_host = DB_HOST;
             $db_port = DB_PORT;
+            $GLOBALS['_is_pgsql'] = (DB_TYPE === 'pgsql');
 
             if (DB_TYPE === 'pgsql') {
                 $dsn = "pgsql:host=$db_host;port=$db_port;dbname=".DB_NAME.";sslmode=require";
@@ -74,6 +92,9 @@ function db(): PDO {
                 $dsn = "mysql:host=$db_host;port=$db_port;dbname=".DB_NAME.";charset=".DB_CHARSET;
             }
         }
+
+        $GLOBALS['_sql_true'] = $GLOBALS['_is_pgsql'] ? 'TRUE' : '1';
+        $GLOBALS['_sql_false'] = $GLOBALS['_is_pgsql'] ? 'FALSE' : '0';
 
         $GLOBALS['_db'] = new PDO($dsn, $db_user, $db_pass, [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,

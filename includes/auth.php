@@ -11,7 +11,8 @@ function current_user(): ?array {
     if (!is_logged_in()) return null;
     static $user = null;
     if (!$user) {
-        $user = db_row("SELECT * FROM users WHERE id = ? AND is_active = 1", [$_SESSION['user_id']]);
+        $bool_true = $GLOBALS['_sql_true'];
+        $user = db_row("SELECT * FROM users WHERE id = ? AND is_active = $bool_true", [$_SESSION['user_id']]);
         if (!$user) { session_destroy(); return null; }
     }
     return $user;
@@ -110,7 +111,7 @@ function add_reputation(int $user_id, int $amount, string $reason): void {
 
 function send_notification(int $user_id, string $type, array $data): void {
     if ($user_id === current_user_id()) return;
-    db_insert("INSERT INTO notifications (id, user_id, type, data, created_at) VALUES (UUID(), ?, ?, ?, NOW())",
+    db_insert("INSERT INTO notifications (user_id, type, data, created_at) VALUES (?, ?, ?, NOW())",
         [$user_id, $type, json_encode($data)]);
 }
 

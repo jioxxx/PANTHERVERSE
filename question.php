@@ -53,7 +53,8 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['post_answer'])) {
     $body = trim($_POST['body'] ?? '');
     if (strlen($body) < 20) $ans_error = 'Answer must be at least 20 characters.';
     else {
-        $aid = db_insert("INSERT INTO answers (question_id,user_id,body,is_accepted,is_instructor_verified,vote_count,created_at,updated_at) VALUES (?,?,?,0,0,0,NOW(),NOW())",
+        $bool_false = $GLOBALS['_sql_false'];
+        $aid = db_insert("INSERT INTO answers (question_id,user_id,body,is_accepted,is_instructor_verified,vote_count,created_at,updated_at) VALUES (?,?,?,$bool_false,$bool_false,0,NOW(),NOW())",
             [$id, current_user_id(), strip_tags($body,'<p><br><strong><em><ul><ol><li><code><pre><h2><h3><blockquote><a>')]);
         if ($q['author_id'] !== current_user_id())
             send_notification($q['author_id'],'new_answer',['question_title'=>$q['title'],'question_id'=>$id,'answerer'=>current_user()['username']]);
@@ -80,9 +81,11 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['accept_answer'])) {
     require_login(); csrf_check();
     $aid = (int)$_POST['answer_id'];
     if (current_user_id() == $q['author_id']) {
-        db_exec("UPDATE answers SET is_accepted=0 WHERE question_id=?", [$id]);
-        db_exec("UPDATE answers SET is_accepted=1 WHERE id=? AND question_id=?", [$aid,$id]);
-        db_exec("UPDATE questions SET is_solved=1,status='answered',accepted_answer_id=? WHERE id=?", [$aid,$id]);
+        $bool_true = $GLOBALS['_sql_true'];
+        $bool_false = $GLOBALS['_sql_false'];
+        db_exec("UPDATE answers SET is_accepted=$bool_false WHERE question_id=?", [$id]);
+        db_exec("UPDATE answers SET is_accepted=$bool_true WHERE id=? AND question_id=?", [$aid,$id]);
+        db_exec("UPDATE questions SET is_solved=$bool_true,status='answered',accepted_answer_id=? WHERE id=?", [$aid,$id]);
         $ans_author = db_row("SELECT user_id FROM answers WHERE id=?", [$aid]);
         if ($ans_author && $ans_author['user_id'] != current_user_id()) {
             add_reputation($ans_author['user_id'], 25, 'Answer accepted');
