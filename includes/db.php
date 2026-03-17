@@ -47,8 +47,9 @@ function db(): PDO {
                 $user .= '.' . $project_id;
             }
             
-            $port = $port ?: ($type === 'mysql' ? '3306' : '5432');            if ($type === 'pgsql') {
-                // Simplified DSN for maximum compatibility
+            $port = $port ?: ($type === 'mysql' ? '3306' : '5432');
+
+            if ($type === 'pgsql') {
                 $dsn = "pgsql:host=$host;port=$port;dbname=$name;sslmode=require";
                 if ($query) {
                     parse_str($query, $query_params);
@@ -78,7 +79,7 @@ function db(): PDO {
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
-            PDO::ATTR_TIMEOUT            => 10, // Increased for stability
+            PDO::ATTR_TIMEOUT            => 30, // Increased back for stability
         ]);
         
         if (DB_TYPE === 'mysql') {
@@ -91,7 +92,7 @@ function db(): PDO {
         die('<div style="font-family:monospace;padding:30px;background:#0e0720;color:#f4a623;min-height:100vh;display:flex;align-items:center;justify-content:center;">
         <div style="max-width:650px;background:#1a0e38;border:2px solid rgba(124,58,237,0.4);border-radius:16px;padding:35px;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
             <h2 style="margin-top:0;display:flex;align-items:center;gap:10px;color:#fff;">
-                <span style="font-size:1.5rem;">⚠️</span> Connection Failed (v11)
+                <span style="font-size:1.5rem;">⚠️</span> Connection Failed (v12)
             </h2>
             
             <p style="color:#a78bca;font-size:0.8rem;margin-bottom:20px;">Source: <strong>' . $env_source . '</strong></p>
@@ -112,7 +113,10 @@ function db(): PDO {
             </div>
             
             <div style="margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);font-size:0.85rem;color:#a78bca;line-height:1.6;">
-                <p><strong>💡 Authentication Tip:</strong> If you see "password authentication failed", your password is incorrect. Please <strong>Reset your Database Password</strong> in the Supabase Dashboard and update Vercel.</p>
+                <p><strong>💡 SSL Connection Closed:</strong> This often happens when the Supabase Pooler is overloaded or resetting. <br><br>
+                1. Go to Supabase Dashboard -> Settings -> Database.<br>
+                2. Change Mode from <strong>Transaction</strong> to <strong>Session</strong>.<br>
+                3. Copy the URL again and update Vercel.</p>
             </div>
         </div></div>');
     }
