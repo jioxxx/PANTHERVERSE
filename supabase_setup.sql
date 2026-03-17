@@ -467,7 +467,7 @@ INSERT INTO users (id, name, username, email, role, password, campus_id, program
 (3, 'Juan dela Cruz', 'juandc', 'juan.delacruz@pantherverse.jrmsu.edu.ph', 'student', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 1, 350),
 (4, 'Ana Reyes', 'ana_reyes', 'ana.reyes@pantherverse.jrmsu.edu.ph', 'student', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 2, 2, 185),
 (5, 'Mark Villanueva', 'markv', 'mark.villanueva@pantherverse.jrmsu.edu.ph', 'student', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 3, 3, 90)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (username) DO NOTHING;
 
 -- 4. TAGS
 INSERT INTO tags (id, name, slug, description) VALUES 
@@ -479,14 +479,14 @@ INSERT INTO tags (id, name, slug, description) VALUES
 (6, 'MySQL', 'mysql', 'MySQL database design'),
 (7, 'HTML/CSS', 'html-css', 'Web markup and styling'),
 (8, 'Algorithms', 'algorithms', 'Algorithm design and complexity')
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, slug = EXCLUDED.slug;
+ON CONFLICT (slug) DO NOTHING;
 
 -- 5. QUESTIONS
 INSERT INTO questions (id, user_id, title, body, slug, status, is_solved, view_count, vote_count) VALUES 
 (1, 3, 'How do I fix a NullPointerException in Java?', '<p>I keep getting a NullPointerException in my Java program when I try to call a method on an object. What causes this and how do I fix it?</p>', 'how-do-i-fix-nullpointerexception-in-java', 'answered', TRUE, 143, 12),
 (2, 4, 'Difference between INNER JOIN and LEFT JOIN in MySQL?', '<p>I am designing a database and I need to retrieve student records. Should I use INNER JOIN or LEFT JOIN?</p>', 'difference-between-inner-join-and-left-join-mysql', 'answered', TRUE, 267, 18),
 (3, 5, 'How does the OSI model relate to real-world protocols?', '<p>I am having trouble understanding how each layer actually maps to real protocols like HTTP, TCP, and Ethernet.</p>', 'osi-model-real-world-networking-protocols', 'open', FALSE, 89, 7)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (slug) DO NOTHING;
 
 -- 6. ANSWERS
 INSERT INTO answers (id, question_id, user_id, body, is_accepted, is_instructor_verified, vote_count) VALUES 
@@ -504,7 +504,7 @@ INSERT INTO forum_categories (id, name, slug, icon, display_order) VALUES
 (2, 'Database & SQL', 'database-sql', 'bi-database', 2),
 (3, 'Web Development', 'web-development', 'bi-globe', 3),
 (4, 'Academic Life', 'academic-life', 'bi-mortarboard', 5)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (slug) DO NOTHING;
 
 -- 8. FORUM POSTS
 INSERT INTO forum_posts (id, category_id, user_id, title, body, is_pinned) VALUES 
