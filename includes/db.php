@@ -12,7 +12,9 @@ define('DB_PASS',    getenv('DB_PASS')    ?: '');
 define('DB_PORT',    getenv('DB_PORT')    ?: (DB_TYPE === 'mysql' ? '3306' : '5432'));
 define('DB_CHARSET', 'utf8mb4');
 
-$GLOBALS['_db'] = null;function db(): PDO {
+$GLOBALS['_db'] = null;
+
+function db(): PDO {
     if ($GLOBALS['_db']) return $GLOBALS['_db'];
     try {
         $db_url = getenv('DATABASE_URL');
@@ -21,8 +23,8 @@ $GLOBALS['_db'] = null;function db(): PDO {
         if ($db_url) {
             $raw_url = $db_url;
             $scheme = parse_url($raw_url, PHP_URL_SCHEME);
-            $user = parse_url($raw_url, PHP_URL_USER);
-            $pass = parse_url($raw_url, PHP_URL_PASS);
+            $user = urldecode(parse_url($raw_url, PHP_URL_USER) ?? '');
+            $pass = urldecode(parse_url($raw_url, PHP_URL_PASS) ?? '');
             $host = parse_url($raw_url, PHP_URL_HOST);
             $port = parse_url($raw_url, PHP_URL_PORT);
             $path = parse_url($raw_url, PHP_URL_PATH);
@@ -30,12 +32,6 @@ $GLOBALS['_db'] = null;function db(): PDO {
             
             $type = in_array($scheme, ['postgres', 'postgresql']) ? 'pgsql' : ($scheme === 'mysql' ? 'mysql' : DB_TYPE);
             $name = ltrim($path ?? '', '/');
-
-            // Force port 6543 for Supabase poolers
-            if ($type === 'pgsql' && strpos($host, 'pooler.supabase') !== false) {
-                $port = 6543;
-            }
-            $port = $port ?: ($type === 'mysql' ? '3306' : '5432');
 
             // Find Project ID for Supabase
             $project_id = '';
@@ -46,20 +42,21 @@ $GLOBALS['_db'] = null;function db(): PDO {
                 $project_id = end($parts);
             }
 
-            // Fix username if needed
-            if ($type === 'pgsql' && strpos($host, 'supabase') !== false && $user && strpos($user, '.') === false && $project_id) {
+            // Supabase Suffix Logic: 
+            // ONLY add .project_id if using a shared pooler (aws-0, etc.)
+            // DIRECT connections (db.xxx.supabase.co) MUST NOT have the suffix.
+            if ($type === 'pgsql' && strpos($host, 'pooler.supabase') !== false && $user && strpos($user, '.') === false && $project_id) {
                 $user .= '.' . $project_id;
             }
+            
+            $port = $port ?: ($type === 'mysql' ? '3306' : '5432');
 
             if ($type === 'pgsql') {
                 $dsn = "pgsql:host=$host;port=$port;dbname=$name;sslmode=require";
-                if ($project_id) {
-                    $dsn .= ";options=project=$project_id";
-                }
                 if ($query) {
                     parse_str($query, $query_params);
                     foreach ($query_params as $k => $v) {
-                        if ($k !== 'sslmode' && $k !== 'options') $dsn .= ";$k=$v";
+                        if ($k !== 'sslmode') $dsn .= ";$k=$v";
                     }
                 }
             } else {
@@ -74,23 +71,7 @@ $GLOBALS['_db'] = null;function db(): PDO {
             $db_port = DB_PORT;
 
             if (DB_TYPE === 'pgsql') {
-                if (strpos($db_host, 'pooler.supabase') !== false) {
-                    $db_port = 6543;
-                }
-                
-                $project_id = '';
-                if (preg_match('/(?:db\.|^)([a-z0-9]{20})\.supabase/', $db_host, $matches)) {
-                    $project_id = $matches[1];
-                }
-
-                if (strpos($db_host, 'supabase') !== false && strpos($db_user, '.') === false && $project_id) {
-                    $db_user .= '.' . $project_id;
-                }
-
                 $dsn = "pgsql:host=$db_host;port=$db_port;dbname=".DB_NAME.";sslmode=require";
-                if ($project_id) {
-                    $dsn .= ";options=project=$project_id";
-                }
             } else {
                 $dsn = "mysql:host=$db_host;port=$db_port;dbname=".DB_NAME.";charset=".DB_CHARSET;
             }
@@ -112,15 +93,15 @@ $GLOBALS['_db'] = null;function db(): PDO {
         die('<div style="font-family:monospace;padding:30px;background:#0e0720;color:#f4a623;min-height:100vh;display:flex;align-items:center;justify-content:center;">
         <div style="max-width:650px;background:#1a0e38;border:2px solid rgba(124,58,237,0.4);border-radius:16px;padding:35px;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
             <h2 style="margin-top:0;display:flex;align-items:center;gap:10px;color:#fff;">
-                <span style="font-size:1.5rem;">⚠️</span> Connection Failed (v8)
+                <span style="font-size:1.5rem;">⚠️</span> Connection Failed (v9)
             </h2>
             
             <p style="color:#a78bca;font-size:0.8rem;margin-bottom:20px;">Source: <strong>' . $env_source . '</strong></p>
 
             <div style="background:#0e0720;padding:20px;border-radius:10px;margin:20px 0;border:1px solid rgba(255,255,255,0.05);">
                 <div style="margin-bottom:15px;">
-                    <p style="margin:0 0 5px 0;font-size:0.7rem;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">Attempted DSN</p>
-                    <code style="color:#fff;word-break:break-all;font-size:0.85rem;">' . htmlspecialchars($safe_dsn) . '</code>
+                    <p style="margin:0 0 5px 0;font-size:0.7rem;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">Attempted Host</p>
+                    <code style="color:#fff;word-break:break-all;font-size:0.85rem;">' . htmlspecialchars($host ?? $db_host ?? 'None') . '</code>
                 </div>
                 <div>
                     <p style="margin:0 0 5px 0;font-size:0.7rem;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">Attempted User</p>
@@ -133,7 +114,7 @@ $GLOBALS['_db'] = null;function db(): PDO {
             </div>
             
             <div style="margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);font-size:0.85rem;color:#a78bca;line-height:1.6;">
-                <p><strong>💡 Final Check:</strong> Ensure your <strong>Password</strong> is correct. If using the Pooler, your DSN above should show <code>port=6543</code> and <code>options=project=...</code>.</p>
+                <p><strong>💡 Final Fix Plan:</strong> If v9 fails, please go to your Supabase Dashboard -> Settings -> Database. Copy the <strong>"Direct Connection"</strong> host (usually starting with <code>db.</code>) and put that in Vercel instead of the Pooler host.</p>
             </div>
         </div></div>');
     }
