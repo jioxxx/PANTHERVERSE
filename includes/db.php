@@ -18,8 +18,9 @@ function db(): PDO {
     if ($GLOBALS['_db']) return $GLOBALS['_db'];
     try {
         $db_url = getenv('DATABASE_URL');
+        $env_source = $db_url ? 'DATABASE_URL' : 'Individual Variables';
+        
         if ($db_url) {
-            // Robust parsing for DATABASE_URL with special characters in password
             $raw_url = $db_url;
             $scheme = parse_url($raw_url, PHP_URL_SCHEME);
             $user = parse_url($raw_url, PHP_URL_USER);
@@ -32,19 +33,19 @@ function db(): PDO {
             $type = in_array($scheme, ['postgres', 'postgresql']) ? 'pgsql' : ($scheme === 'mysql' ? 'mysql' : DB_TYPE);
             $name = ltrim($path ?? '', '/');
 
-            // Supabase/Neon Special Handling: Fix username if project ID is missing
+            // Force port 6543 for Supabase poolers (Direct 5432 often fails on Vercel)
+            if ($type === 'pgsql' && strpos($host, 'pooler.supabase') !== false) {
+                $port = 6543;
+            }
+            
+            $port = $port ?: ($type === 'mysql' ? '3306' : '5432');
+
+            // Supabase Project ID auto-fix
             if ($type === 'pgsql' && strpos($host, 'supabase') !== false && strpos($user, '.') === false) {
                 if (preg_match('/(?:db\.|^)([a-z0-9]{20})\.supabase/', $host, $matches)) {
                     $user .= '.' . $matches[1];
                 }
             }
-
-            // Auto-correct port for Supabase poolers
-            if ($type === 'pgsql' && strpos($host, 'pooler.supabase') !== false && (!$port || $port == 5432)) {
-                $port = 6543; // Transaction mode (highly recommended for Vercel)
-            }
-            
-            $port = $port ?: ($type === 'mysql' ? '3306' : '5432');
 
             if ($type === 'pgsql') {
                 $dsn = "pgsql:host=$host;port=$port;dbname=$name";
@@ -65,15 +66,23 @@ function db(): PDO {
         } else {
             $db_user = DB_USER;
             $db_pass = DB_PASS;
+            $db_host = DB_HOST;
+            $db_port = DB_PORT;
+
             if (DB_TYPE === 'pgsql') {
-                $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME.";sslmode=require";
-                if (strpos(DB_HOST, 'supabase') !== false && strpos($db_user, '.') === false) {
-                    if (preg_match('/(?:db\.|^)([a-z0-9]{20})\.supabase/', DB_HOST, $matches)) {
+                // Force port 6543 for fallbacks too
+                if (strpos($db_host, 'pooler.supabase') !== false) {
+                    $db_port = 6543;
+                }
+                
+                if (strpos($db_host, 'supabase') !== false && strpos($db_user, '.') === false) {
+                    if (preg_match('/(?:db\.|^)([a-z0-9]{20})\.supabase/', $db_host, $matches)) {
                         $db_user .= '.' . $matches[1];
                     }
                 }
+                $dsn = "pgsql:host=$db_host;port=$db_port;dbname=".DB_NAME.";sslmode=require";
             } else {
-                $dsn = "mysql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME.";charset=".DB_CHARSET;
+                $dsn = "mysql:host=$db_host;port=$db_port;dbname=".DB_NAME.";charset=".DB_CHARSET;
             }
         }
 
@@ -94,13 +103,15 @@ function db(): PDO {
         die('<div style="font-family:monospace;padding:30px;background:#0e0720;color:#f4a623;min-height:100vh;display:flex;align-items:center;justify-content:center;">
         <div style="max-width:650px;background:#1a0e38;border:2px solid rgba(124,58,237,0.4);border-radius:16px;padding:35px;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
             <h2 style="margin-top:0;display:flex;align-items:center;gap:10px;color:#fff;">
-                <span style="font-size:1.5rem;">⚠️</span> Connection Failed (v6)
+                <span style="font-size:1.5rem;">⚠️</span> Connection Failed (v7)
             </h2>
             
+            <p style="color:#a78bca;font-size:0.8rem;margin-bottom:20px;">Source: <strong>' . $env_source . '</strong></p>
+
             <div style="background:#0e0720;padding:20px;border-radius:10px;margin:20px 0;border:1px solid rgba(255,255,255,0.05);">
                 <div style="margin-bottom:15px;">
                     <p style="margin:0 0 5px 0;font-size:0.7rem;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">Attempted DSN</p>
-                    <code style="color:#d1d5db;word-break:break-all;font-size:0.85rem;">' . htmlspecialchars($safe_dsn) . '</code>
+                    <code style="color:#fff;word-break:break-all;font-size:0.85rem;">' . htmlspecialchars($safe_dsn) . '</code>
                 </div>
                 <div>
                     <p style="margin:0 0 5px 0;font-size:0.7rem;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">Attempted User</p>
@@ -113,9 +124,7 @@ function db(): PDO {
             </div>
             
             <div style="margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);font-size:0.85rem;color:#a78bca;line-height:1.6;">
-                <p><strong>💡 How to fix the "Tenant not found" error:</strong></p>
-                <p>Ensure your <code>DATABASE_URL</code> in Vercel uses Port <code>6543</code> (The Supabase Pooler). Example:</p>
-                <code style="display:block;background:#0e0720;padding:10px;border-radius:5px;color:#fff;margin-top:5px;font-size:0.75rem;">postgres://postgres.abc:pass@aws-0.pooler.supabase.com:6543/postgres</code>
+                <p><strong>💡 Final Fix:</strong> If you see <code>port=5432</code> above, your Vercel Environment variables are overriding the code. Change <code>DB_PORT</code> to <code>6543</code> in Vercel Settings.</p>
             </div>
         </div></div>');
     }
