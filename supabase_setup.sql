@@ -89,7 +89,12 @@ CREATE TABLE IF NOT EXISTS answers (
   deleted_at TIMESTAMPTZ NULL
 );
 
-ALTER TABLE questions ADD CONSTRAINT fk_accepted_answer FOREIGN KEY (accepted_answer_id) REFERENCES answers(id) ON DELETE SET NULL;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_accepted_answer') THEN
+        ALTER TABLE questions ADD CONSTRAINT fk_accepted_answer FOREIGN KEY (accepted_answer_id) REFERENCES answers(id) ON DELETE SET NULL;
+    END IF;
+END $$;
 
 -- 7. FORUM
 CREATE TABLE IF NOT EXISTS forum_categories (
