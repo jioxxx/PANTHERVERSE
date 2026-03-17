@@ -19,17 +19,27 @@ function db(): PDO {
     try {
         $db_url = getenv('DATABASE_URL');
         if ($db_url) {
-            // Support full DATABASE_URL (common on Vercel/Heroku/Neon)
             $url = parse_url($db_url);
-            $type = $url['scheme'] === 'postgres' ? 'pgsql' : ($url['scheme'] === 'mysql' ? 'mysql' : DB_TYPE);
-            $host = $url['host'];
+            $type = ($url['scheme'] ?? '') === 'postgres' ? 'pgsql' : (($url['scheme'] ?? '') === 'mysql' ? 'mysql' : DB_TYPE);
+            $host = $url['host'] ?? DB_HOST;
             $port = $url['port'] ?? ($type === 'mysql' ? '3306' : '5432');
-            $user = $url['user'];
-            $pass = $url['pass'] ?? '';
-            $name = ltrim($url['path'], '/');
+            $user = $url['user'] ?? DB_USER;
+            $pass = $url['pass'] ?? DB_PASS;
+            $name = ltrim($url['path'] ?? '', '/');
+            $query = $url['query'] ?? '';
             
             if ($type === 'pgsql') {
-                $dsn = "pgsql:host=$host;port=$port;dbname=$name;sslmode=require";
+                $dsn = "pgsql:host=$host;port=$port;dbname=$name";
+                if (strpos($query, 'sslmode') === false) {
+                    $dsn .= ";sslmode=require";
+                }
+                // Append any other query parameters (like options=project=...)
+                if ($query) {
+                    parse_str($query, $query_params);
+                    foreach ($query_params as $k => $v) {
+                        if ($k !== 'sslmode') $dsn .= ";$k=$v";
+                    }
+                }
             } else {
                 $dsn = "mysql:host=$host;port=$port;dbname=$name;charset=".DB_CHARSET;
             }
@@ -56,13 +66,20 @@ function db(): PDO {
             $GLOBALS['_db']->exec("SET sql_mode = ''");
         }
     } catch (PDOException $e) {
-        $db_type_label = DB_TYPE === 'pgsql' ? 'PostgreSQL (Supabase)' : 'MySQL (Laragon)';
+        $db_type_label = DB_TYPE === 'pgsql' ? 'PostgreSQL (Supabase/Neon)' : 'MySQL (Laragon)';
+        $safe_dsn = isset($dsn) ? preg_replace('/:.*@/', ':***@', $dsn) : 'Unknown';
         die('<div style="font-family:monospace;padding:30px;background:#0e0720;color:#f4a623;min-height:100vh;">
-        <div style="max-width:500px;margin:80px auto;background:#1a0e38;border:2px solid rgba(124,58,237,0.4);border-radius:12px;padding:28px;">
-            <h2>⚠️ Database Connection Failed (v2)</h2>
+        <div style="max-width:600px;margin:80px auto;background:#1a0e38;border:2px solid rgba(124,58,237,0.4);border-radius:12px;padding:28px;">
+            <h2>⚠️ Database Connection Failed (v3)</h2>
             <p style="color:#a78bca;margin:12px 0;">Attempted to connect to <strong>' . $db_type_label . '</strong>.</p>
-            <p style="color:#a78bca;margin:12px 0;">Check your Vercel Environment Variables or local Laragon settings.</p>
-            <p style="color:#ef4444;font-size:0.82rem;background:#0e0720;padding:10px;border-radius:6px;">'.htmlspecialchars($e->getMessage()).'</p>
+            <p style="color:#a78bca;margin:12px 0;">DSN (Sanitized): <span style="color:#fff;font-size:0.8rem;">' . htmlspecialchars($safe_dsn) . '</span></p>
+            <p style="color:#a78bca;margin:12px 0;">User: <span style="color:#fff;">' . htmlspecialchars($db_user ?? 'None') . '</span></p>
+            <p style="color:#ef4444;font-size:0.82rem;background:#0e0720;padding:15px;border-radius:6px;border-left:4px solid #ef4444;margin-top:20px;">
+                <strong>Error:</strong><br>'.htmlspecialchars($e->getMessage()).'
+            </p>
+            <div style="margin-top:25px;border-top:1px solid rgba(255,255,255,0.1);padding-top:15px;font-size:0.85rem;color:#888;">
+                <p>💡 Tip: For Neon or Supabase, ensure your connection string includes <code>sslmode=require</code>. If using a pooler, you may need to add <code>options=project=your-project-id</code>.</p>
+            </div>
         </div>');
     }
     return $GLOBALS['_db'];
