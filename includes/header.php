@@ -72,7 +72,7 @@ code { font-size: 0.875em; background: var(--bg3); color: var(--gold); padding: 
   height: 60px;
   display: flex; align-items: center; gap: 16px;
 }
-
+        <?php $avatar_src = !empty($user['profile_photo']) ? '/assets/uploads/profiles/'.e($user['profile_photo']) : avatar_url($user['username']); ?>
 .nav-logo {
   font-family: 'Rajdhani', sans-serif;
   font-size: 1.4rem; font-weight: 700;
@@ -594,7 +594,7 @@ if (is_logged_in() && in_array(current_user_role(),['instructor','admin'])) {
 ?>
 <nav class="navbar">
   <a href="index.php" class="nav-logo">
-    <img src="assets/logo.png" alt="logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <img src="/assets/logo.png" alt="logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
     <span class="logo-fallback" style="display:none">🐆</span>
     PANTHER<span>VERSE</span>
   </a>
@@ -608,7 +608,7 @@ if (is_logged_in() && in_array(current_user_role(),['instructor','admin'])) {
   <!-- Primary nav links -->
   <div class="nav-links">
     <?php
-    $base = './';
+    $base = '/';
     ?>
     <!-- Explore dropdown -->
     <div class="nav-dropdown-wrap" tabindex="0">

@@ -1,6 +1,6 @@
 -- ============================================================
 -- PANTHERVERSE — Consolidated Supabase (Postgres) Setup
--- This script creates ALL tables, indexes, and core seed data.
+-- This script creates ALL tables AND populates SEED DATA.
 -- ============================================================
 
 -- 1. CAMPUSES
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS forum_posts (
 CREATE TABLE IF NOT EXISTS instructor_availability (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  day_of_week SMALLINT NOT NULL, -- 0=Sun, 1=Mon...
+  day_of_week SMALLINT NOT NULL,
   start_time TIME NOT NULL,
   end_time TIME NOT NULL,
   location VARCHAR(200) NULL,
@@ -435,34 +435,91 @@ CREATE TABLE IF NOT EXISTS resource_tag (
   PRIMARY KEY (resource_id, tag_id)
 );
 
--- SEED DATA
-INSERT INTO campuses (name, code, location) VALUES 
-('Main Campus', 'MAIN', 'Dapitan'), 
-('Dipolog Campus', 'DIP', 'Dipolog'),
-('Tampilisan Campus', 'TAMP', 'Tampilisan'),
-('Katipunan Campus', 'KAT', 'Katipunan'),
-('Siocon Campus', 'SIO', 'Siocon')
-ON CONFLICT (code) DO NOTHING;
+-- ============================================================
+-- INITIAL SEED DATA
+-- ============================================================
 
-INSERT INTO programs (name, code) VALUES 
-('BSCS', 'BSCS'), 
-('BSIS', 'BSIS'), 
-('BSIT', 'BSIT')
-ON CONFLICT (code) DO NOTHING;
+-- 1. CAMPUSES
+INSERT INTO campuses (id, name, code, location) VALUES 
+(1, 'JRMSU Main Campus', 'MAIN', 'Dapitan City'), 
+(2, 'JRMSU Dipolog Campus', 'DIP', 'Dipolog City'),
+(3, 'JRMSU Tampilisan Campus', 'TAMP', 'Tampilisan'),
+(4, 'JRMSU Katipunan Campus', 'KAT', 'Katipunan'),
+(5, 'JRMSU Siocon Campus', 'SIO', 'Siocon')
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, code = EXCLUDED.code;
 
-INSERT INTO users (name, username, email, role, password, campus_id, program_id, reputation) VALUES 
-('System Admin', 'admin', 'admin@pantherverse.jrmsu.edu.ph', 'admin', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 2, 9999),
-('Maria Santos', 'prof_santos', 'msantos@pantherverse.jrmsu.edu.ph', 'instructor', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 1, 1250)
-ON CONFLICT (username) DO NOTHING;
+-- 2. PROGRAMS
+INSERT INTO programs (id, name, code) VALUES 
+(1, 'Bachelor of Science in Computer Science', 'BSCS'), 
+(2, 'Bachelor of Science in Information Systems', 'BSIS'), 
+(3, 'Bachelor of Science in Information Technology', 'BSIT')
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, code = EXCLUDED.code;
 
-INSERT INTO forum_categories (name, slug, icon, display_order) VALUES 
-('Programming Help', 'programming-help', 'bi-code-slash', 1), 
-('Database & SQL', 'database-sql', 'bi-database', 2),
-('Academic Life', 'academic-life', 'bi-mortarboard', 5)
-ON CONFLICT (slug) DO NOTHING;
+-- 3. USERS (Passwords are Admin@12345, Instructor@12345, Student@12345)
+INSERT INTO users (id, name, username, email, role, password, campus_id, program_id, reputation) VALUES 
+(1, 'System Admin', 'admin', 'admin@pantherverse.jrmsu.edu.ph', 'admin', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 2, 9999),
+(2, 'Prof. Maria Santos', 'prof_santos', 'msantos@pantherverse.jrmsu.edu.ph', 'instructor', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 1, 1250),
+(3, 'Juan dela Cruz', 'juandc', 'juan.delacruz@pantherverse.jrmsu.edu.ph', 'student', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 1, 350),
+(4, 'Ana Reyes', 'ana_reyes', 'ana.reyes@pantherverse.jrmsu.edu.ph', 'student', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 2, 2, 185),
+(5, 'Mark Villanueva', 'markv', 'mark.villanueva@pantherverse.jrmsu.edu.ph', 'student', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 3, 3, 90)
+ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO tags (name, slug, description) VALUES 
-('PHP', 'php', 'PHP web development'), 
-('Java', 'java', 'Java programming'),
-('Database', 'database', 'Database design and queries')
-ON CONFLICT (slug) DO NOTHING;
+-- 4. TAGS
+INSERT INTO tags (id, name, slug, description) VALUES 
+(1, 'Java', 'java', 'Questions about Java programming'),
+(2, 'Python', 'python', 'Python programming'),
+(3, 'PHP', 'php', 'PHP web development'),
+(4, 'Laravel', 'laravel', 'Laravel PHP framework'),
+(5, 'JavaScript', 'javascript', 'JavaScript frontend and Node.js'),
+(6, 'MySQL', 'mysql', 'MySQL database design'),
+(7, 'HTML/CSS', 'html-css', 'Web markup and styling'),
+(8, 'Algorithms', 'algorithms', 'Algorithm design and complexity')
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, slug = EXCLUDED.slug;
+
+-- 5. QUESTIONS
+INSERT INTO questions (id, user_id, title, body, slug, status, is_solved, view_count, vote_count) VALUES 
+(1, 3, 'How do I fix a NullPointerException in Java?', '<p>I keep getting a NullPointerException in my Java program when I try to call a method on an object. What causes this and how do I fix it?</p>', 'how-do-i-fix-nullpointerexception-in-java', 'answered', TRUE, 143, 12),
+(2, 4, 'Difference between INNER JOIN and LEFT JOIN in MySQL?', '<p>I am designing a database and I need to retrieve student records. Should I use INNER JOIN or LEFT JOIN?</p>', 'difference-between-inner-join-and-left-join-mysql', 'answered', TRUE, 267, 18),
+(3, 5, 'How does the OSI model relate to real-world protocols?', '<p>I am having trouble understanding how each layer actually maps to real protocols like HTTP, TCP, and Ethernet.</p>', 'osi-model-real-world-networking-protocols', 'open', FALSE, 89, 7)
+ON CONFLICT (id) DO NOTHING;
+
+-- 6. ANSWERS
+INSERT INTO answers (id, question_id, user_id, body, is_accepted, is_instructor_verified, vote_count) VALUES 
+(1, 1, 2, '<p>A NullPointerException occurs when you try to use a reference that points to no object. Always null-check before using the object.</p>', TRUE, TRUE, 14),
+(2, 2, 2, '<p>INNER JOIN returns only rows where there is a match in BOTH tables. LEFT JOIN returns ALL rows from the left table and matching rows from the right table.</p>', TRUE, TRUE, 20)
+ON CONFLICT (id) DO NOTHING;
+
+-- UPDATE Question Accepted IDs
+UPDATE questions SET accepted_answer_id = 1 WHERE id = 1;
+UPDATE questions SET accepted_answer_id = 2 WHERE id = 2;
+
+-- 7. FORUM CATEGORIES
+INSERT INTO forum_categories (id, name, slug, icon, display_order) VALUES 
+(1, 'Programming Help', 'programming-help', 'bi-code-slash', 1), 
+(2, 'Database & SQL', 'database-sql', 'bi-database', 2),
+(3, 'Web Development', 'web-development', 'bi-globe', 3),
+(4, 'Academic Life', 'academic-life', 'bi-mortarboard', 5)
+ON CONFLICT (id) DO NOTHING;
+
+-- 8. FORUM POSTS
+INSERT INTO forum_posts (id, category_id, user_id, title, body, is_pinned) VALUES 
+(1, 4, 2, 'Welcome to PANTHERVERSE — Tips for New Members', '<p>Hello everyone! Let us build a strong computing community together. Go Panthers!</p>', TRUE),
+(2, 1, 3, 'Best resources for learning Python?', '<p>Can anyone recommend good free resources for learning Python from scratch?</p>', FALSE)
+ON CONFLICT (id) DO NOTHING;
+
+-- 9. ANNOUNCEMENTS
+INSERT INTO announcements (id, user_id, title, body, priority) VALUES 
+(1, 1, 'Welcome to PANTHERVERSE!', '<p>Welcome to PANTHERVERSE — the official community platform for JRMSU computing students!</p>', 'important'),
+(2, 2, 'Capstone Project Proposal Deadline', '<p>All BSIS students: Please submit your proposals by the end of the semester.</p>', 'urgent')
+ON CONFLICT (id) DO NOTHING;
+
+-- Adjust Serial values
+SELECT setval('campuses_id_seq', (SELECT MAX(id) FROM campuses));
+SELECT setval('programs_id_seq', (SELECT MAX(id) FROM programs));
+SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
+SELECT setval('tags_id_seq', (SELECT MAX(id) FROM tags));
+SELECT setval('questions_id_seq', (SELECT MAX(id) FROM questions));
+SELECT setval('answers_id_seq', (SELECT MAX(id) FROM answers));
+SELECT setval('forum_categories_id_seq', (SELECT MAX(id) FROM forum_categories));
+SELECT setval('forum_posts_id_seq', (SELECT MAX(id) FROM forum_posts));
+SELECT setval('announcements_id_seq', (SELECT MAX(id) FROM announcements));
