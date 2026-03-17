@@ -47,18 +47,13 @@ function db(): PDO {
                 $user .= '.' . $project_id;
             }
             
-            $port = $port ?: ($type === 'mysql' ? '3306' : '5432');
-
-            if ($type === 'pgsql') {
+            $port = $port ?: ($type === 'mysql' ? '3306' : '5432');            if ($type === 'pgsql') {
+                // Simplified DSN for maximum compatibility
                 $dsn = "pgsql:host=$host;port=$port;dbname=$name;sslmode=require";
-                // CRITICAL for Circuit Breaker: Explicitly pass project in options
-                if ($project_id) {
-                    $dsn .= ";options=project=$project_id";
-                }
                 if ($query) {
                     parse_str($query, $query_params);
                     foreach ($query_params as $k => $v) {
-                        if ($k !== 'sslmode' && $k !== 'options') $dsn .= ";$k=$v";
+                        if ($k !== 'sslmode') $dsn .= ";$k=$v";
                     }
                 }
             } else {
@@ -83,7 +78,7 @@ function db(): PDO {
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
-            PDO::ATTR_TIMEOUT            => 5,
+            PDO::ATTR_TIMEOUT            => 10, // Increased for stability
         ]);
         
         if (DB_TYPE === 'mysql') {
@@ -96,14 +91,14 @@ function db(): PDO {
         die('<div style="font-family:monospace;padding:30px;background:#0e0720;color:#f4a623;min-height:100vh;display:flex;align-items:center;justify-content:center;">
         <div style="max-width:650px;background:#1a0e38;border:2px solid rgba(124,58,237,0.4);border-radius:16px;padding:35px;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
             <h2 style="margin-top:0;display:flex;align-items:center;gap:10px;color:#fff;">
-                <span style="font-size:1.5rem;">⚠️</span> Connection Failed (v10)
+                <span style="font-size:1.5rem;">⚠️</span> Connection Failed (v11)
             </h2>
             
             <p style="color:#a78bca;font-size:0.8rem;margin-bottom:20px;">Source: <strong>' . $env_source . '</strong></p>
 
             <div style="background:#0e0720;padding:20px;border-radius:10px;margin:20px 0;border:1px solid rgba(255,255,255,0.05);">
                 <div style="margin-bottom:15px;">
-                    <p style="margin:0 0 5px 0;font-size:0.7rem;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">Attempted DSN</p>
+                    <p style="margin:0 0 5px 0;font-size:0.7rem;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">Current DSN</p>
                     <code style="color:#fff;word-break:break-all;font-size:0.85rem;">' . htmlspecialchars($safe_dsn) . '</code>
                 </div>
                 <div>
@@ -113,11 +108,11 @@ function db(): PDO {
             </div>
 
             <div style="background:rgba(239,68,68,0.1);padding:15px;border-radius:8px;border-left:4px solid #ef4444;margin-top:20px;color:#fca5a5;font-size:0.9rem;">
-                <strong>Driver Error:</strong><br>'.htmlspecialchars($e->getMessage()).'
+                <strong style="color:#fff;">Database Error:</strong><br>'.htmlspecialchars($e->getMessage()).'
             </div>
             
             <div style="margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);font-size:0.85rem;color:#a78bca;line-height:1.6;">
-                <p><strong>💡 Circuit Breaker Fix:</strong> This error usually means too many failed attempts with the wrong password. **Wait 5 minutes** for the pooler to reset, then refresh. Ensure your password in Vercel is exactly <code>jio92124deguzman</code> (no brackets).</p>
+                <p><strong>💡 Authentication Tip:</strong> If you see "password authentication failed", your password is incorrect. Please <strong>Reset your Database Password</strong> in the Supabase Dashboard and update Vercel.</p>
             </div>
         </div></div>');
     }
