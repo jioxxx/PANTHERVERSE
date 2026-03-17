@@ -12,9 +12,7 @@ define('DB_PASS',    getenv('DB_PASS')    ?: '');
 define('DB_PORT',    getenv('DB_PORT')    ?: (DB_TYPE === 'mysql' ? '3306' : '5432'));
 define('DB_CHARSET', 'utf8mb4');
 
-$GLOBALS['_db'] = null;
-
-function db(): PDO {
+$GLOBALS['_db'] = null;function db(): PDO {
     if ($GLOBALS['_db']) return $GLOBALS['_db'];
     try {
         $db_url = getenv('DATABASE_URL');
@@ -33,29 +31,35 @@ function db(): PDO {
             $type = in_array($scheme, ['postgres', 'postgresql']) ? 'pgsql' : ($scheme === 'mysql' ? 'mysql' : DB_TYPE);
             $name = ltrim($path ?? '', '/');
 
-            // Force port 6543 for Supabase poolers (Direct 5432 often fails on Vercel)
+            // Force port 6543 for Supabase poolers
             if ($type === 'pgsql' && strpos($host, 'pooler.supabase') !== false) {
                 $port = 6543;
             }
-            
             $port = $port ?: ($type === 'mysql' ? '3306' : '5432');
 
-            // Supabase Project ID auto-fix
-            if ($type === 'pgsql' && strpos($host, 'supabase') !== false && strpos($user, '.') === false) {
-                if (preg_match('/(?:db\.|^)([a-z0-9]{20})\.supabase/', $host, $matches)) {
-                    $user .= '.' . $matches[1];
-                }
+            // Find Project ID for Supabase
+            $project_id = '';
+            if (preg_match('/(?:db\.|^)([a-z0-9]{20})\.supabase/', $host, $matches)) {
+                $project_id = $matches[1];
+            } elseif ($user && strpos($user, '.') !== false) {
+                $parts = explode('.', $user);
+                $project_id = end($parts);
+            }
+
+            // Fix username if needed
+            if ($type === 'pgsql' && strpos($host, 'supabase') !== false && $user && strpos($user, '.') === false && $project_id) {
+                $user .= '.' . $project_id;
             }
 
             if ($type === 'pgsql') {
-                $dsn = "pgsql:host=$host;port=$port;dbname=$name";
-                if (!$query || strpos($query, 'sslmode') === false) {
-                    $dsn .= ";sslmode=require";
+                $dsn = "pgsql:host=$host;port=$port;dbname=$name;sslmode=require";
+                if ($project_id) {
+                    $dsn .= ";options=project=$project_id";
                 }
                 if ($query) {
                     parse_str($query, $query_params);
                     foreach ($query_params as $k => $v) {
-                        if ($k !== 'sslmode') $dsn .= ";$k=$v";
+                        if ($k !== 'sslmode' && $k !== 'options') $dsn .= ";$k=$v";
                     }
                 }
             } else {
@@ -70,17 +74,23 @@ function db(): PDO {
             $db_port = DB_PORT;
 
             if (DB_TYPE === 'pgsql') {
-                // Force port 6543 for fallbacks too
                 if (strpos($db_host, 'pooler.supabase') !== false) {
                     $db_port = 6543;
                 }
                 
-                if (strpos($db_host, 'supabase') !== false && strpos($db_user, '.') === false) {
-                    if (preg_match('/(?:db\.|^)([a-z0-9]{20})\.supabase/', $db_host, $matches)) {
-                        $db_user .= '.' . $matches[1];
-                    }
+                $project_id = '';
+                if (preg_match('/(?:db\.|^)([a-z0-9]{20})\.supabase/', $db_host, $matches)) {
+                    $project_id = $matches[1];
                 }
+
+                if (strpos($db_host, 'supabase') !== false && strpos($db_user, '.') === false && $project_id) {
+                    $db_user .= '.' . $project_id;
+                }
+
                 $dsn = "pgsql:host=$db_host;port=$db_port;dbname=".DB_NAME.";sslmode=require";
+                if ($project_id) {
+                    $dsn .= ";options=project=$project_id";
+                }
             } else {
                 $dsn = "mysql:host=$db_host;port=$db_port;dbname=".DB_NAME.";charset=".DB_CHARSET;
             }
@@ -92,7 +102,6 @@ function db(): PDO {
             PDO::ATTR_EMULATE_PREPARES   => false,
         ]);
         
-        // MySQL specific optimizations
         if (DB_TYPE === 'mysql') {
             $GLOBALS['_db']->exec("SET sql_mode = ''");
         }
@@ -103,7 +112,7 @@ function db(): PDO {
         die('<div style="font-family:monospace;padding:30px;background:#0e0720;color:#f4a623;min-height:100vh;display:flex;align-items:center;justify-content:center;">
         <div style="max-width:650px;background:#1a0e38;border:2px solid rgba(124,58,237,0.4);border-radius:16px;padding:35px;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
             <h2 style="margin-top:0;display:flex;align-items:center;gap:10px;color:#fff;">
-                <span style="font-size:1.5rem;">⚠️</span> Connection Failed (v7)
+                <span style="font-size:1.5rem;">⚠️</span> Connection Failed (v8)
             </h2>
             
             <p style="color:#a78bca;font-size:0.8rem;margin-bottom:20px;">Source: <strong>' . $env_source . '</strong></p>
@@ -124,7 +133,7 @@ function db(): PDO {
             </div>
             
             <div style="margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);font-size:0.85rem;color:#a78bca;line-height:1.6;">
-                <p><strong>💡 Final Fix:</strong> If you see <code>port=5432</code> above, your Vercel Environment variables are overriding the code. Change <code>DB_PORT</code> to <code>6543</code> in Vercel Settings.</p>
+                <p><strong>💡 Final Check:</strong> Ensure your <strong>Password</strong> is correct. If using the Pooler, your DSN above should show <code>port=6543</code> and <code>options=project=...</code>.</p>
             </div>
         </div></div>');
     }
