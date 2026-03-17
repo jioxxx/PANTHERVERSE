@@ -20,7 +20,14 @@ function db(): PDO {
         $db_url = getenv('DATABASE_URL');
         if ($db_url) {
             $url = parse_url($db_url);
-            $type = ($url['scheme'] ?? '') === 'postgres' ? 'pgsql' : (($url['scheme'] ?? '') === 'mysql' ? 'mysql' : DB_TYPE);
+            $scheme = $url['scheme'] ?? '';
+            if (in_array($scheme, ['postgres', 'postgresql'])) {
+                $type = 'pgsql';
+            } elseif ($scheme === 'mysql') {
+                $type = 'mysql';
+            } else {
+                $type = DB_TYPE;
+            }
             $host = $url['host'] ?? DB_HOST;
             $port = $url['port'] ?? ($type === 'mysql' ? '3306' : '5432');
             $user = $url['user'] ?? DB_USER;
