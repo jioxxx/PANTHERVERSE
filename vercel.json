@@ -3,21 +3,44 @@
   "builds": [
     {
       "src": "api/**/*.php",
-      "use": "vercel-php@latest"
+      "use": "@vercel/php@latest"
     },
     {
       "src": "*.php",
-      "use": "vercel-php@latest"
+      "use": "@vercel/php@latest"
     },
     {
       "src": "admin/**/*.php",
-      "use": "vercel-php@latest"
+      "use": "@vercel/php@latest"
     }
   ],
   "routes": [
-    { "src": "/assets/(.*)", "dest": "/assets/$1" },
-    { "src": "/admin/(.*)", "dest": "/admin/$1.php" },
-    { "src": "/", "dest": "/index.php" },
-    { "src": "/((?!assets|admin|api).*)", "dest": "/$1.php" }
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/admin/$1.php"
+    },
+    {
+      "src": "/((?!assets|admin).*)",
+      "dest": "/$1.php"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/**",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate, max-age=0"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        }
+      ]
+    }
   ]
 }

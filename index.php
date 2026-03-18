@@ -1,7 +1,6 @@
 <?php
-// PANTHERVERSE DEPLOYMENT VERSION: 2.0.2 (Postgres Fixed)
-session_start();
-require_once 'includes/db.php';
+// PANTHERVERSE DEPLOYMENT VERSION: 2.0.2 (Postgres + Session Fix)
+require_once 'includes/session.php';
 require_once 'includes/auth.php';
 require_once 'includes/functions.php';
 
