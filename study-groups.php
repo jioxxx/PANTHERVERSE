@@ -60,7 +60,8 @@ if(is_logged_in()) {
     $my_group_ids = array_column($rows,'group_id');
 }
 
-$campuses = db_rows("SELECT id,name FROM campuses WHERE is_active=1 ORDER BY name");
+$bool_true = $GLOBALS['_sql_true'];
+$campuses = db_rows("SELECT id,name FROM campuses WHERE is_active=$bool_true ORDER BY name");
 $programs = db_rows("SELECT id,name,code FROM programs ORDER BY name");
 $page_title = 'Study Groups';
 require_once 'includes/header.php';

@@ -23,7 +23,8 @@ $total = $result['total'];
 $total_pages = ceil($total / $per_page);
 
 // Get filters data
-$campuses = db_rows("SELECT id, name, code FROM campuses WHERE is_active = 1 ORDER BY name");
+$bool_true = $GLOBALS['_sql_true'];
+$campuses = db_rows("SELECT id, name, code FROM campuses WHERE is_active = $bool_true ORDER BY name");
 $programs = db_rows("SELECT id, name, code FROM programs ORDER BY name");
 
 $page_title = 'User Directory';

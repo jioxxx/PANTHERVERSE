@@ -49,7 +49,8 @@ if ($period === 'alltime') {
     ");
 }
 
-$campuses   = db_rows("SELECT id, name, code FROM campuses WHERE is_active=1 ORDER BY name");
+$bool_true = $GLOBALS['_sql_true'];
+$campuses   = db_rows("SELECT id, name, code FROM campuses WHERE is_active=$bool_true ORDER BY name");
 $my_rank    = null;
 if (is_logged_in()) {
     $my_rank = db_count("SELECT COUNT(*) FROM users WHERE reputation > ? AND is_active=1 AND role=?", [current_user()['reputation'], current_user_role()]) + 1;
