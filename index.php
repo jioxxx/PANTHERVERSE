@@ -1,12 +1,15 @@
 <?php
+
 // PANTHERVERSE DEPLOYMENT VERSION: 2.0.2 (Postgres + Session Fix)
 require_once 'includes/session.php';
+require_once 'includes/db.php';
 require_once 'includes/auth.php';
 require_once 'includes/functions.php';
 
 $is_pgsql = $GLOBALS['_is_pgsql'];
 $bool_true = $GLOBALS['_sql_true'];
 $bool_false = $GLOBALS['_sql_false'];
+
 $group_concat = $is_pgsql ? "STRING_AGG(t.name, ',')" : "GROUP_CONCAT(t.name SEPARATOR ',')";
 
 // Stats

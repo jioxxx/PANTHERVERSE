@@ -5,9 +5,11 @@
  */
 
 // Prevent direct access
-defined('BASE_PATH') or die('No script kiddies');
+// defined('BASE_PATH') or die('No script kiddies');
 
-if (session_status() === PHP_SESSION_NONE) {
+
+if (!isset($_SERVER['VERCEL']) && session_status() === PHP_SESSION_NONE) {
+
     // Detect Vercel/production environment (broader)
     $is_production = (isset($_SERVER['VERCEL']) || strpos($_SERVER['HTTP_HOST'] ?? '', 'vercel.app') !== false)
         || strpos($_SERVER['SERVER_SOFTWARE'] ?? '', 'Vercel') !== false;

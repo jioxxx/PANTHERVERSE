@@ -8,6 +8,7 @@ if (is_logged_in()) redirect('index.php');
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once 'includes/session.php';
     csrf_check();
     $name       = trim($_POST['name'] ?? '');
     $username   = trim($_POST['username'] ?? '');
@@ -66,17 +67,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $all_params = array_merge($insert_data, $extra_params);
 
-        $id = db_insert("INSERT INTO users $columns VALUES $placeholders", $all_params);
-        session_regenerate_id(true);
-        $_SESSION['user_id'] = $id;
-        flash('success', "Welcome to PANTHERVERSE, $name! 🎉 Role: " . ucfirst($role));
-        redirect('index.php');
+        try {
+            $id = db_insert("INSERT INTO users $columns VALUES $placeholders", $all_params);
+            login_user($id);
+            flash('success', "Welcome to PANTHERVERSE, $name! 🎉 Role: " . ucfirst($role));
+            redirect('index.php');
+        } catch (PDOException $e) {
+            error_log("Register INSERT failed: " . $e->getMessage());
+            $error = 'Registration failed due to database error. Please try again or contact support.';
+        }
     }
 }
 
 $bool_true = $GLOBALS['_sql_true'];
-$campuses = db_rows("SELECT id, name, code FROM campuses WHERE is_active=$bool_true ORDER BY name");
-$programs = db_rows("SELECT id, name, code FROM programs ORDER BY name");
+$campuses = [];
+$programs = [];
+// Safely load if tables exist
+try {
+  $campuses = db_rows("SELECT id, name, code FROM campuses WHERE is_active=$bool_true ORDER BY name");
+  $programs = db_rows("SELECT id, name, code FROM programs ORDER BY name");
+} catch (PDOException $e) {
+  error_log("Register: Missing campuses/programs tables: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -1,13 +1,13 @@
-# Pantherverse Session Fix - Vercel Deployment
-## Status: ✅ FIXED - Core Files Updated
+# Pantherverse Registration Fix - Vercel Deployment
+## Status: 🔄 IN PROGRESS
 
-### 1. [x] Create includes/session.php (Vercel-safe session config)
-### 2. [x] Updated login.php, register.php, index.php
-### 3. [x] Updated vercel.json (no-cache headers)
-### 4. [ ] Create DB sessions table (optional robust backup)
-### 5. [ ] Test local + Vercel deployment  
-### 6. [ ] ✅ Complete - attempt_completion
+### 1. [x] Diagnosed missing campuses/programs tables causing register.php failure
+### 2. [x] Simplify register.php: Made campus/program optional with try-catch
+### 3. [x] Added error logging to POST/INSERT handlers
+### 4. [x] Fixed CSRF session issue (Vercel serverless)
+### 5. [ ] Test registration local (Laragon)
+### 6. [ ] Deploy & test Vercel live (pantherverse.vercel.app)
+### 6. [ ] Fix local errors (TBD)
+### 7. [ ] ✅ Complete
 
-**NEXT: Update remaining 48 files with session_start() → session.php**
-
-
+**Current Issue:** register.php expects campuses/programs tables. Vercel DB missing → silent fail.

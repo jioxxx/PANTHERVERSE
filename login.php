@@ -8,6 +8,7 @@ if (is_logged_in()) redirect('index.php');
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once 'includes/session.php';
     csrf_check();
     $email    = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -17,14 +18,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $bool_true = $GLOBALS['_sql_true'];
         $user = db_row("SELECT * FROM users WHERE email = ? AND is_active = $bool_true", [$email]);
+
         if ($user && password_verify($password, $user['password'])) {
-            session_regenerate_id(true);
-            $_SESSION['user_id'] = $user['id'];
+            login_user($user['id']);
             db_exec("UPDATE users SET last_seen_at = NOW() WHERE id = ?", [$user['id']]);
-            $redir = $_SESSION['redirect_after_login'] ?? 'index.php';
-            unset($_SESSION['redirect_after_login']);
+            $redir = $_COOKIE['redirect_after_login'] ?? 'index.php';
             redirect($redir);
         } else {
+
             $error = 'Invalid email or password.';
         }
     }
