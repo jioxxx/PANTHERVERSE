@@ -69,14 +69,14 @@ CREATE TABLE users (
 );
 
 INSERT INTO users (id, name, username, email, email_verified_at, password, role, campus_id, program_id, reputation, bio) VALUES 
-(1, 'System Administrator', 'admin', 'admin@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 1, 2, 9999, 'Platform administrator for PANTHERVERSE.'),
-(2, 'Prof. Maria Santos', 'prof_santos', 'msantos@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'instructor', 1, 1, 1250, 'CS Instructor, JRMSU Main Campus. Specializes in algorithms and data structures.'),
-(3, 'Juan dela Cruz', 'juandc', 'juan.delacruz@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student', 1, 1, 350, 'BSCS student passionate about web development and AI.'),
-(4, 'Ana Reyes', 'ana_reyes', 'ana.reyes@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student', 2, 2, 185, 'BSIS student from Dipolog Campus. Loves databases and system analysis.'),
-(5, 'Mark Villanueva', 'markv', 'mark.villanueva@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student', 3, 3, 90, 'BSIT student interested in networking and cybersecurity.'),
-(6, 'Liza Gomez', 'lizag', 'liza.gomez@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student', 1, 3, 75, 'BSIT student who loves front-end development and UI/UX design.'),
-(7, 'Carlo Mendoza', 'carlom', 'carlo.mendoza@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student', 4, 1, 120, 'BSCS student from Katipunan. Into mobile app development.'),
-(8, 'Prof. Ryan Bautista', 'prof_bautista', 'rbautista@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'instructor', 2, 2, 890, 'IS Instructor at Dipolog Campus. Specializes in systems analysis and databases.');
+(1, 'System Administrator', 'admin', 'admin@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$R.S4w8G/Z9.E3lXkX3S2X.7yv6.f.yE.f.yE.f.yE.f.yE.f.yE.f', 'admin', 1, 2, 9999, 'Platform administrator for PANTHERVERSE.'),
+(2, 'Prof. Maria Santos', 'prof_santos', 'msantos@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$ZpB9xL1pY8.eT2kX7B9kX.7yv6.f.yE.f.yE.f.yE.f.yE.f.yE.f', 'instructor', 1, 1, 1250, 'CS Instructor, JRMSU Main Campus. Specializes in algorithms and data structures.'),
+(3, 'Juan dela Cruz', 'juandc', 'juan.delacruz@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$XqB9xL1pY8.eT2kX7B9kX.7yv6.f.yE.f.yE.f.yE.f.yE.f.yE.f', 'student', 1, 1, 350, 'BSCS student passionate about web development and AI.'),
+(4, 'Ana Reyes', 'ana_reyes', 'ana.reyes@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$XqB9xL1pY8.eT2kX7B9kX.7yv6.f.yE.f.yE.f.yE.f.yE.f.yE.f', 'student', 2, 2, 185, 'BSIS student from Dipolog Campus. Loves databases and system analysis.'),
+(5, 'Mark Villanueva', 'markv', 'mark.villanueva@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$XqB9xL1pY8.eT2kX7B9kX.7yv6.f.yE.f.yE.f.yE.f.yE.f.yE.f', 'student', 3, 3, 90, 'BSIT student interested in networking and cybersecurity.'),
+(6, 'Liza Gomez', 'lizag', 'liza.gomez@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$XqB9xL1pY8.eT2kX7B9kX.7yv6.f.yE.f.yE.f.yE.f.yE.f.yE.f', 'student', 1, 3, 75, 'BSIT student who loves front-end development and UI/UX design.'),
+(7, 'Carlo Mendoza', 'carlom', 'carlo.mendoza@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$XqB9xL1pY8.eT2kX7B9kX.7yv6.f.yE.f.yE.f.yE.f.yE.f.yE.f', 'student', 4, 1, 120, 'BSCS student from Katipunan. Into mobile app development.'),
+(8, 'Prof. Ryan Bautista', 'prof_bautista', 'rbautista@pantherverse.jrmsu.edu.ph', CURRENT_TIMESTAMP, '$2y$12$ZpB9xL1pY8.eT2kX7B9kX.7yv6.f.yE.f.yE.f.yE.f.yE.f.yE.f', 'instructor', 2, 2, 890, 'IS Instructor at Dipolog Campus. Specializes in systems analysis and databases.');
 
 -- 4. TAGS
 CREATE TABLE tags (

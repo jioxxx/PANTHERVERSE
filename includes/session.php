@@ -15,12 +15,14 @@ if (session_status() === PHP_SESSION_NONE) {
         || strpos($_SERVER['SERVER_SOFTWARE'] ?? '', 'Vercel') !== false;
 
     if ($is_production) {
-        // Vercel: HTTPS-only, strict security
-        ini_set('session.cookie_secure', '1');
+        // Vercel serverless session fixes
+        if (!is_dir('/tmp/sessions')) mkdir('/tmp/sessions', 0777, true);
+        session_save_path('/tmp/sessions');
+        
         ini_set('session.cookie_httponly', '1');
         ini_set('session.cookie_samesite', 'Lax');
-        ini_set('session.use_strict_mode', '1');
-        ini_set('session.gc_maxlifetime', '7200'); // 2hr
+        ini_set('session.cookie_secure', '1');
+        ini_set('session.gc_maxlifetime', '3600');
     } else {
         // Local dev (Laragon): Flexible
         ini_set('session.cookie_secure', '0');
