@@ -65,13 +65,13 @@ require_once 'includes/header.php';
   <!-- Profile Header -->
   <div class="card" style="margin-bottom:20px;">
     <?php if(!empty($user['cover_photo'])): ?>
-    <div style="height:180px;background:url('/assets/uploads/covers/<?= e($user['cover_photo']) ?>') center/cover;border-radius:10px 10px 0 0;"></div>
+    <div style="height:180px;background:url('<?= BASE_PATH ?>/assets/uploads/covers/<?= e($user['cover_photo']) ?>') center/cover;border-radius:10px 10px 0 0;"></div>
     <?php else: ?>
     <div style="height:120px;background:linear-gradient(135deg,#1a0938,#3d1680);border-radius:10px 10px 0 0;"></div>
     <?php endif; ?>
     <div style="padding:16px 20px 20px;">
       <div style="display:flex;align-items:flex-end;gap:16px;margin-top:-60px;flex-wrap:wrap;">
-        <?php $avatar_src = !empty($user['profile_photo']) ? '/assets/uploads/profiles/'.e($user['profile_photo']) : avatar_url($user['username']); ?>
+        <?php $avatar_src = !empty($user['profile_photo']) ? BASE_PATH . '/assets/uploads/profiles/'.e($user['profile_photo']) : avatar_url($user['username']); ?>
         <img src="<?= $avatar_src ?>" style="width:110px;height:110px;border-radius:50%;border:4px solid var(--surface);box-shadow:0 6px 16px rgba(0,0,0,0.6); object-fit:cover; position:relative; z-index:2;" alt="">
         <div style="padding-bottom:12px;flex:1;">
           <h1 style="font-family:'Rajdhani',sans-serif;font-size:1.5rem;font-weight:700;margin:0;"><?= e($user['name']) ?></h1>

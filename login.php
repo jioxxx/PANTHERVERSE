@@ -77,7 +77,7 @@ background-image:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(124,58,237,0.2) 
 <div class="auth-wrap">
   <div class="auth-logo">
     <div class="ring">
-      <img src="/assets/logo.png" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <img src="<?= BASE_PATH ?>/assets/logo.png" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
       <span class="lf">🐆</span>
     </div>
     <h1>PANTHER<span>VERSE</span></h1>

@@ -1,14 +1,13 @@
 <?php
 // admin/analytics.php - Admin Analytics Dashboard
-session_start();
-require_once '../includes/db.php';
-require_once '../includes/auth.php';
-require_once '../includes/functions.php';
+require_once __DIR__ . '/../includes/session.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/functions.php';
+
 
 require_login();
-if (!is_admin()) {
-    redirect('index.php');
-}
+require_role('admin');
+
 
 $user = current_user();
 
@@ -120,7 +119,7 @@ require_once '../includes/header.php';
             <div class="card-body" style="padding:0;">
                 <?php if ($recent_users): foreach ($recent_users as $u): ?>
                 <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
-                    <img src="<?= avatar_url($u['username'], 32) ?>" style="width:32px;height:32px;border-radius:50%;">
+                    <img src="<?= avatar_url($u['username']) ?>" style="width:32px;height:32px;border-radius:50%;">
                     <div style="flex:1;min-width:0;">
                         <a href="../profile.php?u=<?= urlencode($u['username']) ?>" style="font-size:0.85rem;color:var(--text);"><?= e($u['name']) ?></a>
                         <div style="font-size:0.75rem;color:var(--text-d);">@<?= e($u['username']) ?> · <?= $u['role'] ?></div>

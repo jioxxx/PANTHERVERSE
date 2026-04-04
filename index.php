@@ -1,5 +1,5 @@
 <?php
-// PANTHERVERSE DEPLOYMENT VERSION: 2.0.2 (Postgres + Session Fix)
+// PANTHERVERSE DEPLOYMENT VERSION: 2.0.3 (Session Fix Applied)
 require_once 'includes/session.php';
 require_once 'includes/auth.php';
 require_once 'includes/functions.php';
@@ -75,7 +75,7 @@ require_once 'includes/header.php';
 <!-- HERO -->
 <div class="hero-banner" style="
   position:relative;
-  background-image: url('/assets/hero_bg.png');
+  background-image: url('<?= BASE_PATH ?>/assets/hero_bg.png');
   background-size: cover;
   background-position: center 30%;
   background-repeat: no-repeat;
@@ -103,7 +103,7 @@ require_once 'includes/header.php';
       box-shadow: 0 0 48px rgba(244,166,35,0.5), 0 0 96px rgba(124,58,237,0.3);
       border-width:2px;
     ">
-      <img src="/assets/logo.png" alt="PANTHERVERSE" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img src="<?= BASE_PATH ?>/assets/logo.png" alt="PANTHERVERSE" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="hero-logo-fallback" style="display:none"><i class="bi bi-grid-3x3-gap" style="font-size:3rem;color:var(--gold);"></i></div>
     </div>
     <div class="hero-text">

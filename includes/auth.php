@@ -133,7 +133,7 @@ function avatar_url(string $username): string {
     }
     
     if (!empty($cache[$username])) {
-        return "/assets/uploads/profiles/" . rawurlencode($cache[$username]);
+        return BASE_PATH . "/assets/uploads/profiles/" . rawurlencode($cache[$username]);
     }
 
     $color = '5B21B6';

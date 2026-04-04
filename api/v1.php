@@ -1,8 +1,7 @@
 <?php
 // api/v1.php - REST API v1 Endpoint
-session_start();
-require_once '../includes/db.php';
-require_once '../includes/functions.php';
+require_once __DIR__ . '/../includes/session.php';
+require_once __DIR__ . '/../includes/functions.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -34,9 +33,12 @@ if ($token) {
 
 // Parse request
 $request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$request_uri = str_replace('/api/v1.php', '', $request_uri);
+// Correctly strip the full path to the script including BASE_PATH
+$script_path = BASE_PATH . '/api/v1.php';
+$request_uri = str_replace($script_path, '', $request_uri);
 $parts = array_filter(explode('/', $request_uri));
 $parts = array_values($parts);
+
 
 $resource = $parts[0] ?? 'questions';
 $id = $parts[1] ?? null;
