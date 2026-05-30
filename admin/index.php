@@ -9,7 +9,7 @@ $stats = [
     'users'     => db_count("SELECT COUNT(*) FROM users"),
     'questions' => db_count("SELECT COUNT(*) FROM questions WHERE deleted_at IS NULL"),
     'answers'   => db_count("SELECT COUNT(*) FROM answers WHERE deleted_at IS NULL"),
-    'reports'   => db_count("SELECT COUNT(*) FROM reports WHERE status='pending'"),
+    'reports'   => db_count("SELECT COUNT(*) FROM content_flags WHERE status='pending'"),
 ];
 
 $users = db_rows("SELECT u.*, c.code as campus_code FROM users u LEFT JOIN campuses c ON u.campus_id=c.id ORDER BY u.created_at DESC LIMIT 20");

@@ -32,7 +32,7 @@ function current_user_year_level(): ?int {
 }
 
 function require_login(): void {
-    if (!is_logged_in()) {
+    if (!is_logged_in() || !current_user()) {
         $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
         redirect('login.php');
     }
@@ -99,8 +99,9 @@ function time_ago(string $datetime): string {
 }
 
 function slugify(string $text): string {
-    $text = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $text), '-'));
-    return $text ?: 'post';
+    $text = preg_replace('/[^A-Za-z0-9-]+/', '-', $text);
+    $text = preg_replace('/-+/', '-', $text);
+    return strtolower(trim($text, '-')) ?: 'post';
 }
 
 function add_reputation(int $user_id, int $amount, string $reason): void {

@@ -46,7 +46,7 @@ require_once '../includes/header.php';
 
 <div class="page-wrap">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
-        <a href="settings.php" class="btn-ghost" style="padding:8px 12px;">
+        <a href="index.php" class="btn-ghost" style="padding:8px 12px;">
             <i class="bi bi-arrow-left"></i> Back
         </a>
         <div>
