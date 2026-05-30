@@ -60,7 +60,8 @@ require_once 'includes/header.php';
   <?php if($error): ?><div class="alert alert-error"><?= e($error) ?></div><?php endif; ?>
 
   <!-- New Post Form (collapsed) -->
-  <div id="new-post-form" style="display:none;" class="card" style="margin-bottom:18px;">
+  <div id="new-post-form" style="display:none;margin-bottom:18px;" class="card">
+
     <div class="card-body">
       <form method="POST">
         <?= csrf_field() ?><input type="hidden" name="new_post" value="1">
