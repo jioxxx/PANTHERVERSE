@@ -52,7 +52,13 @@
 
 html { scroll-behavior: smooth; }
 
-body {
+/* Ensure background layers never cover content */
+body { position: relative; z-index: 0; }
+
+/* Smooth focus ring for accessibility (purple + gold) */
+:focus-visible { outline: 2px solid rgba(244,166,35,0.8); outline-offset: 2px; }
+
+body { margin: 0;
   font-family: 'Nunito', sans-serif;
   background: var(--bg);
   color: var(--text);
