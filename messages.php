@@ -6,6 +6,7 @@ require_once 'includes/auth.php';
 require_once 'includes/functions.php';
 require_login();
 
+
 $uid = current_user_id();
 
 // All conversations (grouped by other person)

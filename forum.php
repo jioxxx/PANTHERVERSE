@@ -39,22 +39,22 @@ $page_title = e($cat['name']);
 require_once 'includes/header.php';
 ?>
 <div class="page-wrap">
-<div style="margin-bottom:18px;display:flex;align-items:center;gap:12px;justify-content:space-between;">
+  <div class="section-head">
     <div>
       <nav style="font-size:0.8rem;color:var(--text-d);margin-bottom:6px;"><a href="forums.php" style="color:var(--text-d);">Forums</a> › <?= e($cat['name']) ?></nav>
-      <h1 style="font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;"><?= e($cat['name']) ?></h1>
+      <h1 class="card-title" style="margin:0; font-size:1.3rem;"><?= e($cat['name']) ?></h1>
     </div>
     <?php if(is_logged_in()): ?>
-    <button onclick="document.getElementById('new-post-form').style.display=document.getElementById('new-post-form').style.display==='none'?'block':'none'" class="btn-gold">+ New Post</button>
+      <button onclick="document.getElementById('new-post-form').style.display=document.getElementById('new-post-form').style.display==='none'?'block':'none'" class="btn-gold">+ New Post</button>
     <?php endif; ?>
   </div>
 
   <!-- Sort Tabs -->
-  <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:8px;">
-    <a href="?id=<?= $cat_id ?>&sort=latest" class="btn-ghost btn-sm <?= $sort==='latest'?'active':'' ?>" style="<?= $sort==='latest'?'background:var(--purple);color:#fff;':'' ?>">Latest</a>
-    <a href="?id=<?= $cat_id ?>&sort=likes" class="btn-ghost btn-sm <?= $sort==='likes'?'active':'' ?>" style="<?= $sort==='likes'?'background:var(--purple);color:#fff;':'' ?>">❤️ Most Liked</a>
-    <a href="?id=<?= $cat_id ?>&sort=views" class="btn-ghost btn-sm <?= $sort==='views'?'active':'' ?>" style="<?= $sort==='views'?'background:var(--purple);color:#fff;':'' ?>">👁 Most Viewed</a>
-    <a href="?id=<?= $cat_id ?>&sort=replies" class="btn-ghost btn-sm <?= $sort==='replies'?'active':'' ?>" style="<?= $sort==='replies'?'background:var(--purple);color:#fff;':'' ?>">💬 Most Replies</a>
+  <div class="tabs" style="margin-bottom:16px;">
+    <a href="?id=<?= $cat_id ?>&sort=latest" class="tab-link <?= $sort==='latest'?'active':'' ?>">Latest</a>
+    <a href="?id=<?= $cat_id ?>&sort=likes" class="tab-link <?= $sort==='likes'?'active':'' ?>">❤️ Most Liked</a>
+    <a href="?id=<?= $cat_id ?>&sort=views" class="tab-link <?= $sort==='views'?'active':'' ?>">👁 Most Viewed</a>
+    <a href="?id=<?= $cat_id ?>&sort=replies" class="tab-link <?= $sort==='replies'?'active':'' ?>">💬 Most Replies</a>
   </div>
 
   <?php if($error): ?><div class="alert alert-error"><?= e($error) ?></div><?php endif; ?>

@@ -11,7 +11,9 @@
 - [ ] Create a shortlist of target pages for upgrade (start with `forum.php`, `questions.php`, `profile.php`, `settings/theme.php`, `settings/index.php`, `index.php`).
 - [x] Update `forum.php` markup to remove invalid attributes (there is at least one duplicate `style` attribute in the “New Post Form” card) and align to `.card/.form-group/.alert/.pagination` patterns.
 
+- [x] Update `forum.php` markup: fix duplicate/invalid attributes and align to shared design system classes.
 - [ ] Update `questions.php` markup: replace remaining inline styles for alerts/sidebar rows; unify vote/like/view boxes with the same `.q-stat-box` patterns.
+
 
 - [ ] Update `profile.php` markup: convert inline “profile header / stats row / badges / liked content” blocks to use existing `.card/.q-card/.widget/.badge-pill` when possible.
 - [ ] Update `settings/theme.php` and `settings/index.php`: replace inline headings/containers with `.card`, `.card-head`, `.card-title`, `.form-group`, `.btn-gold`.
